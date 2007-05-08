@@ -2,7 +2,7 @@
 %{?_with_plf: %{expand: %%define build_plf 1}}
 %{?_without_plf: %{expand: %%define build_plf 0}}
 
-%define rel	3
+%define rel	4
 %if !%build_plf
 %define release %mkrel %{rel}
 %else
