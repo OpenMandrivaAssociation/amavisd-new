@@ -2,7 +2,7 @@
 %{?_with_plf: %{expand: %%define build_plf 1}}
 %{?_without_plf: %{expand: %%define build_plf 0}}
 
-%define rel	4
+%define rel	5
 %if !%build_plf
 %define release %mkrel %{rel}
 %else
@@ -17,7 +17,7 @@ License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
 Source0:	%{name}-%{version}.tar.bz2
-Patch10:	amavisd-new-2.1.2-init.patch
+Patch10:	amavisd-new-2.4.5-init.patch
 Patch11:	amavisd-new-2.4.5-mdv_conf.patch
 Requires:	file >= 3.41
 # http://archives.mandrakelinux.com/cooker/2005-06/msg01987.php
