@@ -2,7 +2,7 @@
 %{?_with_plf: %{expand: %%define build_plf 1}}
 %{?_without_plf: %{expand: %%define build_plf 0}}
 
-%define rel	5
+%define rel	1
 %if !%build_plf
 %define release %mkrel %{rel}
 %else
@@ -11,15 +11,15 @@
 
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
-Version:	2.4.5
+Version:	2.5.1
 Release:	%{release}
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
-Source0:	%{name}-%{version}.tar.bz2
+Source0:	http://www.ijs.si/software/amavisd/%{name}-%{version}.tar.gz
 Patch10:	amavisd-new-2.4.5-init.patch
-Patch11:	amavisd-new-2.4.5-mdv_conf.patch
-Requires:	file >= 3.41
+Patch11:	amavisd-new-mdv_conf.diff
+Requires:	file >= 4.21
 # http://archives.mandrakelinux.com/cooker/2005-06/msg01987.php
 Requires:	mail-server
 Requires:	perl-Archive-Tar
@@ -206,5 +206,3 @@ fi
 %attr(0750,amavis,amavis) %dir %{_localstatedir}/amavis/db
 %attr(0750,amavis,amavis) %dir %{_localstatedir}/amavis/.spamassassin
 %attr(0640,amavis,amavis) %config(noreplace) %{_localstatedir}/amavis/.spamassassin/user_prefs
-
-
