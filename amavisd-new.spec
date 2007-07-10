@@ -11,14 +11,14 @@
 
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
-Version:	2.5.1
+Version:	2.5.2
 Release:	%{release}
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
-Source0:	http://www.ijs.si/software/amavisd/%{name}-%{version}.tar.gz
+Source0:	http://www.ijs.si/software/amavisd/%{name}-%{version}.tar.bz2
 Patch10:	amavisd-new-2.4.5-init.patch
-Patch11:	amavisd-new-mdv_conf.diff
+Patch11:	amavisd-new-mdv_conf.patch
 Requires:	file >= 4.21
 # http://archives.mandrakelinux.com/cooker/2005-06/msg01987.php
 Requires:	mail-server
