@@ -16,9 +16,10 @@ Release:	%{release}
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
-Source0:	http://www.ijs.si/software/amavisd/%{name}-%{version}.tar.bz2
-Patch10:	amavisd-new-2.4.5-init.patch
-Patch11:	amavisd-new-mdv_conf.patch
+Source0:	http://www.ijs.si/software/amavisd/%{name}-%{version}.tar.gz
+Patch0:		amavisd-new-2.4.5-init.patch
+Patch1:		amavisd-new-mdv_conf.diff
+Patch2:		amavisd-new-2008_specs.diff
 Requires:	file >= 4.21
 # http://archives.mandrakelinux.com/cooker/2005-06/msg01987.php
 Requires:	mail-server
@@ -79,9 +80,11 @@ AMaViS is a perl script that interfaces a Mail Transport Agent (MTA)
 with one or more virus scanners (not provided).
 
 %prep
+
 %setup -q -n %{name}-%{version}
-%patch10 -p1 -b .init
-%patch11 -p1 -b .confpch
+%patch0 -p1 -b .init
+%patch1 -p1 -b .confpch
+%patch2 -p0 -b .2008_specs
 
 %build
 
