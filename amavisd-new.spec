@@ -21,7 +21,7 @@ Patch0:		amavisd-new-2.4.5-init.patch
 Patch1:		amavisd-new-mdv_conf.diff
 Patch2:		amavisd-new-2008_specs.diff
 Requires:	file >= 4.21
-# http://archives.mandrakelinux.com/cooker/2005-06/msg01987.php
+# http://archives.mandrivalinux.com/cooker/2005-06/msg01987.php
 Requires:	mail-server
 Requires:	perl-Archive-Tar
 Requires:	perl-Archive-Zip
