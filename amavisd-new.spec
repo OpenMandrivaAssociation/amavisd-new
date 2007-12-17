@@ -73,7 +73,6 @@ Requires(pre): rpm-helper
 Requires(postun): rpm-helper
 #PreReq:	clamav
 Obsoletes:	amavis-postfix
-BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
 %description
 AMaViS is a perl script that interfaces a Mail Transport Agent (MTA)
