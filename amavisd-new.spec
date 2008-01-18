@@ -1,7 +1,7 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
 Version:	2.5.3
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
@@ -14,29 +14,36 @@ Requires:	file >= 4.21
 Requires:	mail-server
 Requires:	perl-Archive-Tar
 Requires:	perl-Archive-Zip
+Requires:	perl-BerkeleyDB
+Requires:	perl-Compress-Zlib
 Requires:	perl-Convert-UUlib >= 1.08
 Requires:	perl-Convert-TNEF
 Requires:	perl-DBI
+Requires:	perl-Digest-MD5
 Requires:	perl-IO-stringy
 Requires:	perl-ldap
 Requires:	perl-libnet
 Requires:	perl-Mail-SpamAssassin
 Requires:	perl-MailTools
 Requires:	perl-MIME-Base64
+Requires:	perl-MIME-tools >= 5.411
+Requires:	perl-Net-Server >= 0.84
 Requires:	perl-Razor-Agent
+Requires:	perl-Time-HiRes
+Requires:	perl-Unix-Syslog
 Requires:	spamassassin >= 2.60
 Requires:	spamassassin-spamd >= 2.60
 Requires:	spamassassin-spamc >= 2.60
 Requires:	binutils
-Suggests:   bzip2
-Suggests:	cabextract
-Suggests:	tnef
-Suggests:	lha
-Suggests:	lzop
-Suggests:	ncompress
-Suggests:	nomarch
-Suggests:	pax
-Suggests:	ripole
+Requires:	bzip2
+Requires:	cabextract
+Requires:	tnef
+Requires:	lha
+Requires:	lzop
+Requires:	ncompress
+Requires:	nomarch
+Requires:	pax
+Requires:	ripole
 Provides:	amavisd
 BuildArch:	noarch
 # this is for serviceadd, etc.
