@@ -35,15 +35,15 @@ Requires:	spamassassin >= 2.60
 Requires:	spamassassin-spamd >= 2.60
 Requires:	spamassassin-spamc >= 2.60
 Requires:	binutils
-Requires:	bzip2
-Requires:	cabextract
-Requires:	tnef
-Requires:	lha
-Requires:	lzop
-Requires:	ncompress
-Requires:	nomarch
-Requires:	pax
-Requires:	ripole
+Suggests:   bzip2
+Suggests:	cabextract
+Suggests:	tnef
+Suggests:	lha
+Suggests:	lzop
+Suggests:	ncompress
+Suggests:	nomarch
+Suggests:	pax
+Suggests:	ripole
 Provides:	amavisd
 BuildArch:	noarch
 # this is for serviceadd, etc.
