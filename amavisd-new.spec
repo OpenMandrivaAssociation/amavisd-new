@@ -14,23 +14,16 @@ Requires:	file >= 4.21
 Requires:	mail-server
 Requires:	perl-Archive-Tar
 Requires:	perl-Archive-Zip
-Requires:	perl-BerkeleyDB
-Requires:	perl-Compress-Zlib
 Requires:	perl-Convert-UUlib >= 1.08
 Requires:	perl-Convert-TNEF
 Requires:	perl-DBI
-Requires:	perl-Digest-MD5
 Requires:	perl-IO-stringy
 Requires:	perl-ldap
 Requires:	perl-libnet
 Requires:	perl-Mail-SpamAssassin
 Requires:	perl-MailTools
 Requires:	perl-MIME-Base64
-Requires:	perl-MIME-tools >= 5.411
-Requires:	perl-Net-Server >= 0.84
 Requires:	perl-Razor-Agent
-Requires:	perl-Time-HiRes
-Requires:	perl-Unix-Syslog
 Requires:	spamassassin >= 2.60
 Requires:	spamassassin-spamd >= 2.60
 Requires:	spamassassin-spamc >= 2.60
