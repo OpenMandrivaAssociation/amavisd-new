@@ -1,18 +1,7 @@
-%define build_plf 0
-%{?_with_plf: %{expand: %%define build_plf 1}}
-%{?_without_plf: %{expand: %%define build_plf 0}}
-
-%define rel	1
-%if !%build_plf
-%define release %mkrel %{rel}
-%else
-%define release %{rel}plf
-%endif
-
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
 Version:	2.5.3
-Release:	%{release}
+Release:	%mkrel 2
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
@@ -55,14 +44,6 @@ Requires:	ncompress
 Requires:	nomarch
 Requires:	pax
 Requires:	ripole
-%if %build_plf
-#Requires:	arc
-Requires:	unace
-Requires:	unarj
-Requires:	unrar
-Requires:	zoo
-Requires:	freeze
-%endif
 Provides:	amavisd
 BuildArch:	noarch
 # this is for serviceadd, etc.
