@@ -1,6 +1,6 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
-Version:	2.5.4
+Version:	2.6.0
 Release:	%mkrel 1
 License:	GPL
 Group:		Networking/Mail
@@ -16,13 +16,15 @@ Requires:	perl-Archive-Tar
 Requires:	perl-Archive-Zip
 Requires:	perl-BerkeleyDB
 Requires:	perl-Compress-Zlib
-Requires:	perl-Convert-UUlib >= 1.08
 Requires:	perl-Convert-TNEF
+Requires:	perl-Convert-UUlib >= 1.08
+Requires:	perl-Crypt-OpenSSL-RSA
 Requires:	perl-DBI
 Requires:	perl-Digest-MD5
 Requires:	perl-IO-stringy
 Requires:	perl-ldap
 Requires:	perl-libnet
+Requires:	perl-Mail-DKIM
 Requires:	perl-Mail-SpamAssassin
 Requires:	perl-MailTools
 Requires:	perl-MIME-Base64
