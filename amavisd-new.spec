@@ -78,9 +78,9 @@ install -d %{buildroot}%{_initrddir}
 install -d %{buildroot}%{_sysconfdir}/amavisd
 install -d %{buildroot}%{_sbindir}
 install -d %{buildroot}%{_bindir}
-install -d %{buildroot}%{_localstatedir}/amavis/.spamassassin
+install -d %{buildroot}%{_localstatedir}/lib/amavis/.spamassassin
 install -d %{buildroot}/var/spool/amavis/virusmails
-install -d %{buildroot}%{_localstatedir}/amavis/{tmp,db}
+install -d %{buildroot}%{_localstatedir}/lib/amavis/{tmp,db}
 
 install -m0755 amavisd_init.sh %{buildroot}%{_initrddir}/amavisd
 install -m0640 amavisd.conf %{buildroot}%{_sysconfdir}/amavisd/amavisd.conf
@@ -92,7 +92,7 @@ install -m0755 amavisd-agent %{buildroot}%{_sbindir}/
 install -m0755 amavisd-nanny %{buildroot}%{_sbindir}/
 install -m0755 amavisd-release %{buildroot}%{_sbindir}/
 
-cat > %{buildroot}%{_localstatedir}/amavis/.spamassassin/user_prefs <<EOF
+cat > %{buildroot}%{_localstatedir}/lib/amavis/.spamassassin/user_prefs <<EOF
 # SpamAssassin User Preferences file
 # (see perldoc Mail::SpamAssassin::Conf for details of what can be tweaked).
 # Note that the entries for headers won't have effect, since those are
@@ -144,7 +144,7 @@ EOF
 rm -rf %{buildroot}
 
 %pre
-%_pre_useradd amavis %{_localstatedir}/amavis /bin/false
+%_pre_useradd amavis %{_localstatedir}/lib/amavis /bin/false
 %_pre_groupadd amavis amavis,clamav
 
 %post
@@ -187,8 +187,8 @@ fi
 %attr(0755,root,root) %{_bindir}/amavisd-*
 %attr(0755,root,root) %dir /var/spool/amavis
 %attr(0750,amavis,amavis) %dir /var/spool/amavis/virusmails
-%attr(0750,amavis,amavis) %dir %{_localstatedir}/amavis
-%attr(0750,amavis,amavis) %dir %{_localstatedir}/amavis/tmp
-%attr(0750,amavis,amavis) %dir %{_localstatedir}/amavis/db
-%attr(0750,amavis,amavis) %dir %{_localstatedir}/amavis/.spamassassin
-%attr(0640,amavis,amavis) %config(noreplace) %{_localstatedir}/amavis/.spamassassin/user_prefs
+%attr(0750,amavis,amavis) %dir %{_localstatedir}/lib/amavis
+%attr(0750,amavis,amavis) %dir %{_localstatedir}/lib/amavis/tmp
+%attr(0750,amavis,amavis) %dir %{_localstatedir}/lib/amavis/db
+%attr(0750,amavis,amavis) %dir %{_localstatedir}/lib/amavis/.spamassassin
+%attr(0640,amavis,amavis) %config(noreplace) %{_localstatedir}/lib/amavis/.spamassassin/user_prefs
