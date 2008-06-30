@@ -1,6 +1,6 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
-Version:	2.6.0
+Version:	2.6.1
 Release:	%mkrel 1
 License:	GPL
 Group:		Networking/Mail
