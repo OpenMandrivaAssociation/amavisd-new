@@ -1,14 +1,13 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
 Version:	2.6.1
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
 Source0:	http://www.ijs.si/software/amavisd/%{name}-%{version}.tar.gz
 Patch0:		amavisd-new-2.4.5-init.patch
 Patch1:		amavisd-new-mdv_conf.diff
-Patch2:		amavisd-new-2008_specs.diff
 Requires:	file >= 4.21
 # http://archives.mandrivalinux.com/cooker/2005-06/msg01987.php
 Requires:	mail-server
@@ -67,7 +66,6 @@ with one or more virus scanners (not provided).
 %setup -q -n %{name}-%{version}
 %patch0 -p1 -b .init
 %patch1 -p1 -b .confpch
-%patch2 -p0 -b .2008_specs
 
 %build
 
@@ -76,11 +74,13 @@ rm -rf %{buildroot}
 
 install -d %{buildroot}%{_initrddir}
 install -d %{buildroot}%{_sysconfdir}/amavisd
+install -d %{buildroot}%{_sysconfdir}/logrotate.d
 install -d %{buildroot}%{_sbindir}
 install -d %{buildroot}%{_bindir}
 install -d %{buildroot}/var/lib/amavis/.spamassassin
 install -d %{buildroot}/var/spool/amavis/virusmails
 install -d %{buildroot}/var/lib/amavis/{tmp,db}
+install -d %{buildroot}/var/log/amavis
 
 install -m0755 amavisd_init.sh %{buildroot}%{_initrddir}/amavisd
 install -m0640 amavisd.conf %{buildroot}%{_sysconfdir}/amavisd/amavisd.conf
@@ -140,6 +140,25 @@ cat > %{buildroot}%{_bindir}/amavisd-mboxlearnspam <<EOF
 su amavis -c "%{_bindir}/sa-learn --showdots --spam --mbox \$1" -s /bin/sh
 EOF
 
+touch %{buildroot}/var/log/amavis/amavisd.log
+
+cat > %{buildroot}%{_sysconfdir}/logrotate.d/amavisd << EOF
+/var/log/amavis/amavisd.log {
+    create 640 amavis amavis
+    rotate 5
+    weekly
+    missingok
+    notifempty
+    sharedscripts
+    prerotate
+	service amavisd stop
+    endscript
+    postrotate
+	service amavisd start
+    endscript
+}
+EOF
+
 %clean
 rm -rf %{buildroot}
 
@@ -149,6 +168,7 @@ rm -rf %{buildroot}
 
 %post
 %_post_service amavisd
+%create_ghostfile /var/log/amavis/amavisd.log amavis amavis 0640
 
 # check mta
 mta="`readlink /etc/alternatives/sendmail-command 2>/dev/null | cut -d . -f 2`"
@@ -177,6 +197,7 @@ fi
 %doc LDAP.schema amavisd-new-courier.patch amavisd-new-qmqpqq.patch
 %attr(0755,root,root) %{_initrddir}/amavisd
 %attr(0640,root,amavis) %config(noreplace) %{_sysconfdir}/amavisd/amavisd.conf
+%attr(0644,root,root) %config(noreplace) %{_sysconfdir}/logrotate.d/amavisd
 %attr(0640,root,amavis) %{_sysconfdir}/amavisd/amavisd.conf-default
 %attr(0640,root,amavis) %{_sysconfdir}/amavisd/amavisd.conf-sample
 %attr(0755,root,root) %{_sbindir}/amavisd
@@ -192,3 +213,5 @@ fi
 %attr(0750,amavis,amavis) %dir /var/lib/amavis/db
 %attr(0750,amavis,amavis) %dir /var/lib/amavis/.spamassassin
 %attr(0640,amavis,amavis) %config(noreplace) /var/lib/amavis/.spamassassin/user_prefs
+%attr(0750,amavis,amavis) %dir /var/log/amavis
+%attr(0640,amavis,amavis) %ghost /var/log/amavis/amavisd.log
