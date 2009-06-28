@@ -1,7 +1,7 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
 Version:	2.6.4
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
@@ -14,7 +14,7 @@ Requires:	mail-server
 Requires:	perl-Archive-Tar
 Requires:	perl-Archive-Zip
 Requires:	perl-BerkeleyDB
-Requires:	perl-Compress-Zlib
+Requires:	perl(Compress::Zlib)
 Requires:	perl-Convert-TNEF
 Requires:	perl-Convert-UUlib >= 1.08
 Requires:	perl-Crypt-OpenSSL-RSA
