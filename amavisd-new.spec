@@ -1,7 +1,7 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
 Version:	2.6.4
-Release:	%mkrel 2
+Release:	%mkrel 3
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
@@ -89,6 +89,8 @@ install -m0755 p0f-analyzer.pl %{buildroot}%{_sbindir}/
 install -m0755 amavisd-agent %{buildroot}%{_sbindir}/
 install -m0755 amavisd-nanny %{buildroot}%{_sbindir}/
 install -m0755 amavisd-release %{buildroot}%{_sbindir}/
+install -m0755 amavisd-snmp-subagent %{buildroot}%{_sbindir}/
+
 
 cat > %{buildroot}/var/lib/amavis/.spamassassin/user_prefs <<EOF
 # SpamAssassin User Preferences file
@@ -173,6 +175,7 @@ fi
 %defattr(-,root,root)
 %doc AAAREADME.first INSTALL LICENSE README_FILES RELEASE_NOTES test-messages
 %doc LDAP.schema amavisd-new-courier.patch amavisd-new-qmqpqq.patch
+%doc AMAVIS-MIB.txt
 %attr(0755,root,root) %{_initrddir}/amavisd
 %attr(0640,root,amavis) %config(noreplace) %{_sysconfdir}/amavisd/amavisd.conf
 %attr(0640,root,amavis) %{_sysconfdir}/amavisd/amavisd.conf-default
@@ -182,6 +185,7 @@ fi
 %attr(0755,root,root) %{_sbindir}/amavisd-agent
 %attr(0755,root,root) %{_sbindir}/amavisd-nanny
 %attr(0755,root,root) %{_sbindir}/amavisd-release
+%attr(0755,root,root) %{_sbindir}/amavisd-snmp-subagent
 %attr(0755,root,root) %{_bindir}/amavisd-*
 %attr(0755,root,root) %dir /var/spool/amavis
 %attr(0750,amavis,amavis) %dir /var/spool/amavis/virusmails
