@@ -1,13 +1,14 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
 Version:	2.6.4
-Release:	%mkrel 3
+Release:	%mkrel 4
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
 Source0:	http://www.ijs.si/software/amavisd/%{name}-%{version}.tar.gz
 Patch0:		amavisd-new-2.4.5-init.patch
 Patch1:		amavisd-new-mdv_conf.diff
+Patch2:		amavisd-new-nanny-path.diff
 Requires:	file >= 4.21
 # http://archives.mandrivalinux.com/cooker/2005-06/msg01987.php
 Requires:	mail-server
@@ -66,6 +67,7 @@ with one or more virus scanners (not provided).
 %setup -q -n %{name}-%{version}
 %patch0 -p1 -b .init
 %patch1 -p1 -b .confpch
+%patch2 -p0 -b .nanny_correct_db_path
 
 %build
 
