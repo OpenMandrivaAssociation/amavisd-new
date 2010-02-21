@@ -70,7 +70,7 @@ with one or more virus scanners (not provided).
 %patch0 -p1 -b .init
 %patch2 -p1 -b .confpch
 %patch3 -p1 -b .SA
-%patch3 -p3 -b .SNMP
+%patch4 -p3 -b .SNMP
 %build
 
 %install
