@@ -1,7 +1,7 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
 Version:	2.6.6
-Release:	%mkrel 1
+Release:	2
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
@@ -58,7 +58,6 @@ Requires(pre): rpm-helper
 Requires(postun): rpm-helper
 #PreReq:	clamav
 Obsoletes:	amavis-postfix
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 AMaViS is a perl script that interfaces a Mail Transport Agent (MTA)
@@ -74,7 +73,6 @@ with one or more virus scanners (not provided).
 %build
 
 %install
-rm -rf %{buildroot}
 
 install -d %{buildroot}%{_initrddir}
 install -d %{buildroot}%{_sysconfdir}/amavisd
@@ -143,9 +141,6 @@ cat > %{buildroot}%{_bindir}/amavisd-mboxlearnspam <<EOF
 #!/bin/sh
 su amavis -c "%{_bindir}/sa-learn --showdots --spam --mbox \$1" -s /bin/sh
 EOF
-
-%clean
-rm -rf %{buildroot}
 
 %pre
 %_pre_useradd amavis /var/lib/amavis /bin/false
