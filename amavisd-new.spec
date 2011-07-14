@@ -1,7 +1,7 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
-Version:	2.6.6
-Release:	2
+Version:	2.7.0
+Release:	1
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
@@ -69,7 +69,7 @@ with one or more virus scanners (not provided).
 %patch0 -p1 -b .init
 %patch2 -p1 -b .confpch
 %patch3 -p1 -b .SA
-%patch4 -p3 -b .SNMP
+%patch4 -p1 -b .SNMP
 %build
 
 %install
@@ -85,7 +85,6 @@ install -d %{buildroot}/var/lib/amavis/{tmp,db}
 install -m0755 amavisd_init.sh %{buildroot}%{_initrddir}/amavisd
 install -m0640 amavisd.conf %{buildroot}%{_sysconfdir}/amavisd/amavisd.conf
 install -m0640 amavisd.conf-default %{buildroot}%{_sysconfdir}/amavisd/amavisd.conf-default
-install -m0640 amavisd.conf-sample %{buildroot}%{_sysconfdir}/amavisd/amavisd.conf-sample
 install -m0755 amavisd %{buildroot}%{_sbindir}/amavisd
 install -m0755 p0f-analyzer.pl %{buildroot}%{_sbindir}/
 install -m0755 amavisd-agent %{buildroot}%{_sbindir}/
@@ -178,7 +177,6 @@ fi
 %attr(0755,root,root) %{_initrddir}/amavisd
 %attr(0640,root,amavis) %config(noreplace) %{_sysconfdir}/amavisd/amavisd.conf
 %attr(0640,root,amavis) %{_sysconfdir}/amavisd/amavisd.conf-default
-%attr(0640,root,amavis) %{_sysconfdir}/amavisd/amavisd.conf-sample
 %attr(0755,root,root) %{_sbindir}/amavisd
 %attr(0755,root,root) %{_sbindir}/p0f-analyzer.pl
 %attr(0755,root,root) %{_sbindir}/amavisd-agent
