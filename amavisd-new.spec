@@ -1,11 +1,11 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
-Version:	2.7.0
+Version:	2.7.1
 Release:	1
 License:	GPL
 Group:		Networking/Mail
 URL:		http://www.ijs.si/software/amavisd/
-Source0:	http://www.ijs.si/software/amavisd/%{name}-%{version}.tar.gz
+Source0:	http://www.ijs.si/software/amavisd/%{name}-%{version}.tar.xz
 Patch0:		amavisd-new-2.4.5-init.patch
 Patch1:		amavisd-new-mdv_conf.diff
 Patch2:		amavisd-new-mdv_conf-2.diff
@@ -70,6 +70,9 @@ with one or more virus scanners (not provided).
 %patch2 -p1 -b .confpch
 %patch3 -p1 -b .SA
 %patch4 -p1 -b .SNMP
+
+find README_FILES |xargs chmod o+r
+
 %build
 
 %install
