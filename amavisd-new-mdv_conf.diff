@@ -1,0 +1,840 @@
+diff -Naur amavisd-new-2.6.4/amavisd amavisd-new-2.6.4.oden/amavisd
+--- amavisd-new-2.6.4/amavisd	2009-06-25 14:39:01.000000000 +0200
++++ amavisd-new-2.6.4.oden/amavisd	2009-06-27 12:56:16.000000000 +0200
+@@ -633,7 +633,7 @@
+ #
+ BEGIN {
+   # serves only as a quick default for other configuration settings
+-  $MYHOME   = '/var/amavis';
++  $MYHOME   = '/var/lib/amavis';
+   $mydomain = '!change-mydomain-variable!.example.com';#intentionally bad deflt
+ 
+   # Create debugging output - true: log to stderr; false: log to syslog/file
+@@ -747,7 +747,7 @@
+   #
+   # Receiving mail related
+ 
+-  # $unix_socketname = '/var/amavis/amavisd.sock'; # old amavis client protocol
++  # $unix_socketname = '/var/lib/amavis/amavisd.sock'; # old amavis client protocol
+   # $inet_socket_port = 10024;      # accept SMTP on this TCP port
+   # $inet_socket_port = [10024,10026,10027];  # ...possibly on more than one
+   $inet_socket_bind = '127.0.0.1';  # limit socket bind to loopback interface
+@@ -757,8 +757,8 @@
+                     10.0.0.0/8 172.16.0.0/12 192.168.0.0/16 );
+   $originating = 0;  # a boolean, initially reflects @mynetworks,
+                      # but may be modified later through a policy bank
+-  $notify_method  = 'smtp:[127.0.0.1]:10025';
+-  $forward_method = 'smtp:[127.0.0.1]:10025';
++  $notify_method  = 'smtp:[127.0.0.1]:10026';
++  $forward_method = 'smtp:[127.0.0.1]:10026';
+   $resend_method  = undef; # overrides $forward_method on defanging if nonempty
+   $release_method = undef; # overrides $notify_method on releasing
+                            #   from quarantine if nonempty
+@@ -1023,7 +1023,7 @@
+     X-Quarantine-ID X-Amavis-Alert X-Amavis-Hold X-Amavis-Modified
+     X-Amavis-PenPals X-Amavis-OS-Fingerprint X-Amavis-PolicyBank
+     X-Spam-Status X-Spam-Level X-Spam-Flag X-Spam-Score
+-    X-Spam-Report X-Spam-Checker-Version X-Spam-Tests
++    X-Spam-Report X-Spam-Checker-Version X-Spam-Tests X-Scanned-By
+     X-CRM114-Status X-CRM114-CacheID X-CRM114-Notice X-CRM114-Action
+     X-DSPAM-Result X-DSPAM-Class X-DSPAM-Signature X-DSPAM-Processed
+     X-DSPAM-Confidence X-DSPAM-Probability X-DSPAM-User X-DSPAM-Factors
+@@ -2732,12 +2732,12 @@
+ # The $hashref argument is returned for convenience, so that one can do
+ # for example:
+ #   $per_recip_whitelist_sender_lookup_tables = {
+-#     '.my1.example.com' => read_hash({},'/var/amavis/my1-example-com.wl'),
+-#     '.my2.example.com' => read_hash({},'/var/amavis/my2-example-com.wl') }
++#     '.my1.example.com' => read_hash({},'/var/lib/amavis/my1-example-com.wl'),
++#     '.my2.example.com' => read_hash({},'/var/lib/amavis/my2-example-com.wl') }
+ # or even simpler:
+ #   $per_recip_whitelist_sender_lookup_tables = {
+-#     '.my1.example.com' => read_hash('/var/amavis/my1-example-com.wl'),
+-#     '.my2.example.com' => read_hash('/var/amavis/my2-example-com.wl') }
++#     '.my1.example.com' => read_hash('/var/lib/amavis/my1-example-com.wl'),
++#     '.my2.example.com' => read_hash('/var/lib/amavis/my2-example-com.wl') }
+ #
+ sub read_hash(@) {
+   unshift(@_,{})  if !ref $_[0];  # first argument is optional, defaults to {}
+@@ -13608,7 +13608,7 @@
+   Amavis::Lookup::RE->new(@$Amavis::Conf::map_full_type_to_short_type_re);
+ 
+ # default location of the config file if none specified
+-push(@config_files, '/etc/amavisd.conf')  if !@config_files;
++push(@config_files, '/etc/amavisd/amavisd.conf')  if !@config_files;
+ # Read and evaluate config files, which may override default settings
+ Amavis::Conf::include_config_files(@config_files);
+ Amavis::Conf::supply_after_defaults();
+@@ -14075,7 +14075,7 @@
+ # set up Net::Server configuration
+ my($server) = Amavis->new({
+     # command args to be used after HUP must be untainted, deflt: [$0,@ARGV]
+-  # commandline => ['/usr/local/sbin/amavisd','-c',$config_file[0] ],
++  # commandline => ['/usr/sbin/amavisd','-c',$config_file[0] ],
+     commandline => [],  # disable
+     port => \@listen_sockets,  # listen on the these sockets (Unix or inet)
+     # limit socket bind (e.g. to the loopback interface)
+@@ -14172,7 +14172,7 @@
+ 
+ #sub lock_stat($) {
+ # my($label) = @_;
+-# my($s) = qx'/usr/local/bin/db_stat-4.2 -c -h /var/amavis/db | /usr/local/bin/perl -ne \'$a{$2}=$1 if /^(\d+)\s+Total number of locks (requested|released)/; END {printf("%d, %d\n",$a{requested}, $a{requested}-$a{released})}\'';
++# my($s) = qx'/usr/bin/db_stat-4.2 -c -h /var/lib/amavis/db | /usr/bin/perl -ne \'$a{$2}=$1 if /^(\d+)\s+Total number of locks (requested|released)/; END {printf("%d, %d\n",$a{requested}, $a{requested}-$a{released})}\'';
+ # do_log(0, "lock_stat %s: %s", $label,$s);
+ #}
+ 
+@@ -15564,9 +15564,9 @@
+   # Required AM.PDP fields are: request, tempdir, sender, recipient(s)
+   #   request=AM.PDP
+   #   version_client=n             (currently ignored)
+-  #   tempdir=/var/amavis/amavis-milter-MWZmu9Di
++  #   tempdir=/var/lib/amavis/amavis-milter-MWZmu9Di
+   #   tempdir_removed_by=client    (tempdir_removed_by=server is a default)
+-  #   mail_file=/var/amavis/am.../email.txt (defaults to tempdir/email.txt)
++  #   mail_file=/var/lib/amavis/am.../email.txt (defaults to tempdir/email.txt)
+   #   sender=<foo@example.com>
+   #   recipient=<bar1@example.net>
+   #   recipient=<bar2@example.net>
+@@ -21714,7 +21714,7 @@
+ }
+ 
+ # expects spamd started like the following:
+-#   spamd -H /var/amavis/home -r /var/amavis/home/spamd.pid -s user \
++#   spamd -H /var/lib/amavis/home -r /var/lib/amavis/home/spamd.pid -s user \
+ #         -u vscan -g vscan -d -x -P --min-children=25 --max-children=25
+ 
+ sub check {
+diff -Naur amavisd-new-2.6.4/amavisd-agent amavisd-new-2.6.4.oden/amavisd-agent
+--- amavisd-new-2.6.4/amavisd-agent	2009-06-18 21:17:30.000000000 +0200
++++ amavisd-new-2.6.4.oden/amavisd-agent	2009-06-27 12:48:01.000000000 +0200
+@@ -50,7 +50,7 @@
+ 
+ my($dbfile) = 'snmp.db';
+ my($db_home) =  # DB databases directory
+-  defined $ENV{'AMAVISD_DB_HOME'} ? $ENV{'AMAVISD_DB_HOME'} : '/var/amavis/db';
++  defined $ENV{'AMAVISD_DB_HOME'} ? $ENV{'AMAVISD_DB_HOME'} : '/var/lib/amavis/db';
+ 
+ my($wakeuptime) = 10;  # -w, sleep time in seconds, may be fractional
+ my($repeatcount);      # -c, repeat count (when defined)
+diff -Naur amavisd-new-2.6.4/amavisd.conf amavisd-new-2.6.4.oden/amavisd.conf
+--- amavisd-new-2.6.4/amavisd.conf	2009-06-25 14:38:47.000000000 +0200
++++ amavisd-new-2.6.4.oden/amavisd.conf	2009-06-27 12:50:28.000000000 +0200
+@@ -15,15 +15,15 @@
+ # $bypass_decode_parts = 1;         # controls running of decoders&dearchivers
+ 
+ $max_servers = 2;            # num of pre-forked children (2..30 is common), -m
+-$daemon_user  = 'vscan';     # (no default;  customary: vscan or amavis), -u
+-$daemon_group = 'vscan';     # (no default;  customary: vscan or amavis), -g
++$daemon_user  = 'amavis';     # (no default;  customary: vscan or amavis), -u
++$daemon_group = 'amavis';     # (no default;  customary: vscan or amavis), -g
+ 
+-$mydomain = 'example.com';   # a convenient default for other settings
++$mydomain = 'localhost.localdomain';   # a convenient default for other settings
+ 
+-# $MYHOME = '/var/amavis';   # a convenient default for other settings, -H
++# $MYHOME = '/var/lib/amavis';   # a convenient default for other settings, -H
+ $TEMPBASE = "$MYHOME/tmp";   # working directory, needs to exist, -T
+ $ENV{TMPDIR} = $TEMPBASE;    # environment variable TMPDIR, used by SA, etc.
+-$QUARANTINEDIR = '/var/virusmails';  # -Q
++$QUARANTINEDIR = '/var/spool/amavis/virusmails';  # -Q
+ # $quarantine_subdir_levels = 1;  # add level of subdirs to disperse quarantine
+ # $release_format = 'resend';     # 'attach', 'plain', 'resend'
+ # $report_format  = 'arf';        # 'attach', 'plain', 'resend', 'arf'
+@@ -32,8 +32,9 @@
+ 
+ # $db_home   = "$MYHOME/db";      # dir for bdb nanny/cache/snmp databases, -D
+ # $helpers_home = "$MYHOME/var";  # working directory for SpamAssassin, -S
+-# $lock_file = "$MYHOME/var/amavisd.lock";  # -L
+-# $pid_file  = "$MYHOME/var/amavisd.pid";   # -P
++# $lock_file = "$MYHOME/var/lib/amavisd.lock";  # -L
++# $pid_file  = "$MYHOME/var/lib/amavisd.pid";   # -P
++
+ #NOTE: create directories $MYHOME/tmp, $MYHOME/var, $MYHOME/db manually
+ 
+ $log_level = 0;              # verbosity 0..5, -d
+@@ -58,7 +59,7 @@
+ $unix_socketname = "$MYHOME/amavisd.sock";  # amavisd-release or amavis-milter
+                # option(s) -p overrides $inet_socket_port and $unix_socketname
+ 
+-$inet_socket_port = 10024;   # listen on this local TCP port(s)
++$inet_socket_port = 10025;   # listen on this local TCP port(s)
+ # $inet_socket_port = [10024,10026];  # listen on multiple TCP ports
+ 
+ $policy_bank{'MYNETS'} = {   # mail originating from @mynetworks
+@@ -94,9 +95,9 @@
+   auth_required_release => 0,  # do not require secret_id for amavisd-release
+ };
+ 
+-$sa_tag_level_deflt  = 2.0;  # add spam info headers if at, or above that level
+-$sa_tag2_level_deflt = 6.2;  # add 'spam detected' headers at that level
+-$sa_kill_level_deflt = 6.9;  # triggers spam evasive actions (e.g. blocks mail)
++$sa_tag_level_deflt  = 1.0;  # add spam info headers if at, or above that level
++$sa_tag2_level_deflt = 4.7;  # add 'spam detected' headers at that level
++$sa_kill_level_deflt = 4.7;  # triggers spam evasive actions (e.g. blocks mail)
+ $sa_dsn_cutoff_level = 10;   # spam level beyond which a DSN is not sent
+ $sa_crediblefrom_dsn_cutoff_level = 18; # likewise, but for a likely valid From
+ # $sa_quarantine_cutoff_level = 25; # spam level beyond which quarantine is off
+@@ -104,7 +105,7 @@
+ $penpals_threshold_high = $sa_kill_level_deflt;  # don't waste time on hi spam
+ $bounce_killer_score = 100;  # spam score points to add for joe-jobbed bounces
+ 
+-$sa_mail_body_size_limit = 400*1024; # don't waste time on SA if mail is larger
++$sa_mail_body_size_limit = 512*1024; # don't waste time on SA if mail is larger
+ $sa_local_tests_only = 0;    # only tests which do not require internet access?
+ 
+ # @lookup_sql_dsn =
+@@ -136,7 +137,7 @@
+ $MAXLEVELS = 14;
+ $MAXFILES = 1500;
+ $MIN_EXPANSION_QUOTA =      100*1024;  # bytes  (default undef, not enforced)
+-$MAX_EXPANSION_QUOTA = 300*1024*1024;  # bytes  (default undef, not enforced)
++$MAX_EXPANSION_QUOTA = 512*1024*1024;  # bytes  (default undef, not enforced)
+ 
+ $sa_spam_subject_tag = '***SPAM*** ';
+ $defang_virus  = 1;  # MIME-wrap passed infected mail
+@@ -151,12 +152,12 @@
+ 
+ # $myhostname = 'host.example.com';  # must be a fully-qualified domain name!
+ 
+-# $notify_method  = 'smtp:[127.0.0.1]:10025';
+-# $forward_method = 'smtp:[127.0.0.1]:10025';  # set to undef with milter!
++# $notify_method  = 'smtp:[127.0.0.1]:10026';
++# $forward_method = 'smtp:[127.0.0.1]:10026';  # set to undef with milter!
+ 
+ # $final_virus_destiny      = D_DISCARD;
+ # $final_banned_destiny     = D_BOUNCE;
+-# $final_spam_destiny       = D_BOUNCE;
++# $final_spam_destiny       = D_PASS;
+ # $final_bad_header_destiny = D_PASS;
+ # $bad_header_quarantine_method = undef;
+ 
+@@ -271,7 +272,7 @@
+     [qr'^(inkjetplanet|marketopt|MakeMoney)\d*@'i                    => 5.0],
+    ),
+ 
+-#  read_hash("/var/amavis/sender_scores_sitewide"),
++#  read_hash("/var/lib/amavis/sender_scores_sitewide"),
+ 
+    { # a hash-type lookup table (associative array)
+      'nobody@cert.org'                        => -3.0,
+@@ -361,7 +362,7 @@
+ 
+ # ### http://www.clamav.net/
+ # ['ClamAV-clamd',
+-#   \&ask_daemon, ["CONTSCAN {}\n", "/var/run/clamav/clamd"],
++#   \&ask_daemon, ["CONTSCAN {}\n", "/var/lib/clamav/clamd.socket"],
+ #   qr/\bOK$/m, qr/\bFOUND$/m,
+ #   qr/^.*?: (?!Infected Archive)(.*) FOUND$/m ],
+ # # NOTE: run clamd under the same user as amavisd, or run it under its own
+@@ -418,7 +419,7 @@
+ #    pack('N',0).  # content size
+ #    pack('N',0),
+ #    '/var/drweb/run/drwebd.sock',
+-#  # '/var/amavis/var/run/drwebd.sock',   # suitable for chroot
++#  # '/var/lib/amavis/var/run/drwebd.sock',   # suitable for chroot
+ #  # '/usr/local/drweb/run/drwebd.sock',  # FreeBSD drweb ports default
+ #  # '127.0.0.1:3000',                    # or over an inet socket
+ #   ],
+@@ -457,12 +458,12 @@
+       '/opt/AVP/avpdc', 'avpdc' ],
+     "-f=$TEMPBASE {}", [0,8], [3,4,5,6], qr/infected: ([^\r\n]+)/m ],
+     # change the startup-script in /etc/init.d/kavd to:
+-    #   DPARMS="-* -Y -dl -f=/var/amavis /var/amavis"
+-    #   (or perhaps:   DPARMS="-I0 -Y -* /var/amavis" )
+-    # adjusting /var/amavis above to match your $TEMPBASE.
+-    # The '-f=/var/amavis' is needed if not running it as root, so it
++    #   DPARMS="-* -Y -dl -f=/var/lib/amavis /var/lib/amavis"
++    #   (or perhaps:   DPARMS="-I0 -Y -* /var/lib/amavis" )
++    # adjusting /var/lib/amavis above to match your $TEMPBASE.
++    # The '-f=/var/lib/amavis' is needed if not running it as root, so it
+     # can find, read, and write its pid file, etc., see 'man kavdaemon'.
+-    # defUnix.prf: there must be an entry "*/var/amavis" (or whatever
++    # defUnix.prf: there must be an entry "*/var/lib/amavis" (or whatever
+     #   directory $TEMPBASE specifies) in the 'Names=' section.
+     # cd /opt/AVP/DaemonClients; configure; cd Sample; make
+     # cp AvpDaemonClient /opt/AVP/
+diff -Naur amavisd-new-2.6.4/amavisd.conf-default amavisd-new-2.6.4.oden/amavisd.conf-default
+--- amavisd-new-2.6.4/amavisd.conf-default	2009-06-25 14:38:32.000000000 +0200
++++ amavisd-new-2.6.4.oden/amavisd.conf-default	2009-06-27 12:48:01.000000000 +0200
+@@ -24,7 +24,7 @@
+ # $snmp_location = '';
+ # $daemon_user   = undef;
+ # $daemon_group  = undef;
+-# $MYHOME        = '/var/amavis';
++# $MYHOME        = '/var/lib/amavis';
+ # $TEMPBASE      = $MYHOME;                # after-default
+ # $db_home       = "$MYHOME/db";           # after-default
+ # $pid_file      = "$MYHOME/amavisd.pid";  # after-default
+@@ -112,7 +112,7 @@
+ 
+ ## MAIL FORWARDING AND DKIM SIGNING
+ 
+-# $forward_method = 'smtp:[127.0.0.1]:10025';
++# $forward_method = 'smtp:[127.0.0.1]:10026';
+ # $resend_method = undef;  # falls back to $forward_method
+ # $always_bcc = undef;
+ 
+@@ -164,7 +164,7 @@
+ 
+ ## NOTIFICATIONS (DSN, admin, recip)
+ 
+-# $notify_method  = 'smtp:[127.0.0.1]:10025';
++# $notify_method  = 'smtp:[127.0.0.1]:10026';
+ 
+ # $propagate_dsn_if_possible = 1;
+ # $terminate_dsn_on_notify_success = 0;
+diff -Naur amavisd-new-2.6.4/amavisd.conf-sample amavisd-new-2.6.4.oden/amavisd.conf-sample
+--- amavisd-new-2.6.4/amavisd.conf-sample	2009-06-25 14:38:38.000000000 +0200
++++ amavisd-new-2.6.4.oden/amavisd.conf-sample	2009-06-27 12:50:06.000000000 +0200
+@@ -63,7 +63,7 @@
+ # $MYHOME serves as a quick default for some other configuration settings.
+ # More refined control is available with each individual setting further down.
+ # $MYHOME is not used directly by the program. No trailing slash!
+-#$MYHOME = '/var/lib/amavis';   # (default is '/var/amavis'), -H
++#$MYHOME = '/var/lib/amavis';   # (default is '/var/lib/amavis'), -H
+ 
+ # $mydomain serves as a quick default for some other configuration settings.
+ # More refined control is available with each individual setting further down.
+@@ -74,14 +74,14 @@
+ 
+ # Set the user and group to which the daemon will change if started as root
+ # (otherwise just keeps the UID unchanged, and these settings have no effect):
+-$daemon_user  = 'vscan';   # (no default;  customary: vscan or amavis), -u
+-$daemon_group = 'vscan';   # (no default;  customary: vscan or amavis), -g
++$daemon_user  = 'amavis';   # (no default;  customary: vscan or amavis), -u
++$daemon_group = 'amavis';   # (no default;  customary: vscan or amavis or sweep), -g
+ 
+ # Runtime working directory (cwd), and a place where
+ # temporary directories for unpacking mail are created.
+ # (no trailing slash, may be a scratch file system)
+ $TEMPBASE = $MYHOME;	        # (must be set if other config vars use is), -T
+-#$TEMPBASE = "$MYHOME/tmp";     # prefer to keep home dir /var/amavis clean?
++#$TEMPBASE = "$MYHOME/tmp";     # prefer to keep home dir /var/lib/amavis clean?
+ 
+ #$db_home = "$MYHOME/db";    # DB databases directory, default "$MYHOME/db", -D
+ 
+@@ -111,7 +111,7 @@
+ # POSTFIX, or SENDMAIL in dual-MTA setup, or EXIM V4
+ # (set host and port number as required; host can be specified
+ # as an IP address or a DNS name (A or CNAME, but MX is ignored)
+-#$forward_method = 'smtp:[127.0.0.1]:10025';  # where to forward checked mail
++#$forward_method = 'smtp:[127.0.0.1]:10026';  # where to forward checked mail
+ #$notify_method = $forward_method;            # where to submit notifications
+ 
+ #$os_fingerprint_method = 'p0f:127.0.0.1:2345';  # query p0f-analyzer.pl
+@@ -210,7 +210,7 @@
+ #   ( [qw( .example.com !host.sub.example.net .sub.example.net )] );
+ # @local_domains_maps = ( new_RE( qr'[@.]example\.com$'i ) );   # using regexp
+ # @local_domains_maps = ( read_hash("$MYHOME/local_domains") ); # using hash
+-#   perhaps combined with Postfix: mydestination = /var/amavis/local_domains
++#   perhaps combined with Postfix: mydestination = /var/lib/amavis/local_domains
+ # for debugging purposes: dump_hash($local_domains_maps[0]);
+ #
+ # Section II - MTA specific (defaults should be ok)
+@@ -230,7 +230,7 @@
+ 
+ # SMTP SERVER (INPUT) PROTOCOL SETTINGS (e.g. with Postfix, Exim v4, ...)
+ #   (used when MTA is configured to pass mail to amavisd via SMTP or LMTP)
+-$inet_socket_port = 10024;        # accept SMTP on this local TCP port
++$inet_socket_port = 10025;        # accept SMTP on this local TCP port
+                                   # (default is undef, i.e. disabled)
+ # multiple ports may be provided: $inet_socket_port = [10024, 10026, 10028];
+ 
+@@ -502,7 +502,7 @@
+ #
+ $final_virus_destiny      = D_DISCARD; # (defaults to D_DISCARD)
+ $final_banned_destiny     = D_BOUNCE;  # (defaults to D_BOUNCE)
+-$final_spam_destiny       = D_BOUNCE;  # (defaults to D_BOUNCE)
++$final_spam_destiny       = D_PASS;  # (defaults to D_BOUNCE)
+ $final_bad_header_destiny = D_PASS;    # (defaults to D_PASS)
+ 
+ # to explicitly list all (or most) possible contents category (ccat) keys:
+@@ -581,7 +581,7 @@
+ 
+ # Notify virus (or banned files or bad headers) RECIPIENT?
+ #  (not very useful, but some policies demand it)
+-#$warnvirusrecip = 1;	# (defaults to false (undef))
++$warnvirusrecip = 1;	# (defaults to false (undef))
+ #$warnbannedrecip = 1;	# (defaults to false (undef))
+ #$warnbadhrecip = 1;	# (defaults to false (undef))
+ 
+@@ -603,6 +603,9 @@
+   qr'tanatos|lentin|bridex|mimail|trojan\.dropper|dumaru|parite|spaces'i,
+   qr'dloader|galil|gibe|swen|netwatch|bics|sbrowse|sober|rox|val(hal)?la'i,
+   qr'frethem|sircam|be?agle|tanx|mydoom|novarg|shimg|netsky|somefool|moodown'i,
++  qr'badtrans|magistr|bagle'i,
++  qr'mthredir|sdboot.gen|funlove|yaha|zafi|gibe|lovgate|nyxem|mabutu'i
++  qr'plexus|mytob|SCO'i,
+   qr'@mm|@MM',    # mass mailing viruses as labeled by f-prot and uvscan
+   qr'Worm'i,      # worms as labeled by ClamAV, Kaspersky, etc
+ # [qr'^(EICAR|Joke\.|Junk\.)'i         => 0],
+@@ -694,7 +697,7 @@
+ #   or a directory (no trailing slash)
+ #   (the default value is undef, meaning no quarantine)
+ #
+-$QUARANTINEDIR = '/var/virusmails';  # -Q
++$QUARANTINEDIR = '/var/spool/amavis/virusmails';  # -Q
+ 
+ #$quarantine_subdir_levels = 1;  # add level of subdirs to disperse quarantine
+ 
+@@ -1442,7 +1445,7 @@
+     [qr'^(inkjetplanet|marketopt|MakeMoney)\d*@'i                    => 5.0],
+    ),
+ 
+-#  read_hash("/var/amavis/sender_scores_sitewide"),
++#  read_hash("/var/lib/amavis/sender_scores_sitewide"),
+ 
+    { # a hash-type lookup table (associative array)
+      'nobody@cert.org'                        => -3.0,
+@@ -1659,7 +1662,7 @@
+ #     but never less than MIN_EXPANSION_QUOTA
+ #
+ $MIN_EXPANSION_QUOTA =      100*1024;  # bytes  (default undef, not enforced)
+-$MAX_EXPANSION_QUOTA = 300*1024*1024;  # bytes  (default undef, not enforced)
++$MAX_EXPANSION_QUOTA = 512*1024*1024;  # bytes  (default undef, not enforced)
+ $MIN_EXPANSION_FACTOR =   5;  # times original mail size  (default is 5)
+ $MAX_EXPANSION_FACTOR = 500;  # times original mail size  (default is 500)
+ 
+@@ -1748,14 +1751,14 @@
+ #$sa_auto_whitelist = 1;    # turn on AWL in SA 2.63 or older (irrelevant
+                             # for SA 3.0, its cf option is use_auto_whitelist)
+ 
+-$sa_mail_body_size_limit = 400*1024; # don't waste time on SA if mail is larger
++$sa_mail_body_size_limit = 512*1024; # don't waste time on SA if mail is larger
+ 			    # (less than 1% of spam is > 64k)
+ 			    # default: undef, no limitations
+ 
+ # default values, customarily used in the @spam_*_level_maps as the last entry
+ $sa_tag_level_deflt  = 2.0; # add spam info headers if at, or above that level;
+ 			    # undef is interpreted as lower than any spam level
+-$sa_tag2_level_deflt = 6.31;# add 'spam detected' headers at that level to
++$sa_tag2_level_deflt = 4.7;# add 'spam detected' headers at that level to
+                             # passed mail, adding address extensions;
+ $sa_kill_level_deflt = $sa_tag2_level_deflt; # triggers spam evasive actions
+ 			    # at or above that level: bounce/reject/drop,
+@@ -1824,7 +1827,7 @@
+ #     < dsn_cutoff_level <= quarantine_cutoff_level
+ 
+ # string to prepend to Subject header field when message exceeds tag2 level
+-#$sa_spam_subject_tag = '***SPAM*** ';	# (defaults to undef, disabled)
++$sa_spam_subject_tag = '***SPAM*** ';	# (defaults to undef, disabled)
+ 			     # (only seen when spam is passed and recipient is
+                              # in local_domains*)
+ # more examples, using @*_maps directly:
+@@ -1932,7 +1935,7 @@
+ 
+ # ### http://www.clamav.net/
+ # ['ClamAV-clamd',
+-#   \&ask_daemon, ["CONTSCAN {}\n", "/var/run/clamav/clamd"],
++#   \&ask_daemon, ["CONTSCAN {}\n", "/var/lib/clamav/clamd.socket"],
+ #   qr/\bOK$/m, qr/\bFOUND$/m,
+ #   qr/^.*?: (?!Infected Archive)(.*) FOUND$/m ],
+ # # NOTE: run clamd under the same user as amavisd, or run it under its own
+@@ -1989,7 +1992,7 @@
+ #    pack('N',0).  # content size
+ #    pack('N',0),
+ #    '/var/drweb/run/drwebd.sock',
+-#  # '/var/amavis/var/run/drwebd.sock',   # suitable for chroot
++#  # '/var/lib/amavis/var/run/drwebd.sock',   # suitable for chroot
+ #  # '/usr/local/drweb/run/drwebd.sock',  # FreeBSD drweb ports default
+ #  # '127.0.0.1:3000',                    # or over an inet socket
+ #   ],
+@@ -2028,12 +2031,12 @@
+       '/opt/AVP/avpdc', 'avpdc' ],
+     "-f=$TEMPBASE {}", [0,8], [3,4,5,6], qr/infected: ([^\r\n]+)/m ],
+     # change the startup-script in /etc/init.d/kavd to:
+-    #   DPARMS="-* -Y -dl -f=/var/amavis /var/amavis"
+-    #   (or perhaps:   DPARMS="-I0 -Y -* /var/amavis" )
+-    # adjusting /var/amavis above to match your $TEMPBASE.
+-    # The '-f=/var/amavis' is needed if not running it as root, so it
++    #   DPARMS="-* -Y -dl -f=/var/lib/amavis /var/lib/amavis"
++    #   (or perhaps:   DPARMS="-I0 -Y -* /var/lib/amavis" )
++    # adjusting /var/lib/amavis above to match your $TEMPBASE.
++    # The '-f=/var/lib/amavis' is needed if not running it as root, so it
+     # can find, read, and write its pid file, etc., see 'man kavdaemon'.
+-    # defUnix.prf: there must be an entry "*/var/amavis" (or whatever
++    # defUnix.prf: there must be an entry "*/var/lib/amavis" (or whatever
+     #   directory $TEMPBASE specifies) in the 'Names=' section.
+     # cd /opt/AVP/DaemonClients; configure; cd Sample; make
+     # cp AvpDaemonClient /opt/AVP/
+@@ -2448,7 +2451,7 @@
+ #   amavis_auth_user => 'amavisd', amavis_auth_pass = 'tOpsecretX',
+ #   av_scanners => [  # provide only 'free' scanners
+ #     ['ClamAV-clamd',
+-#       \&ask_daemon, ["CONTSCAN {}\n", "/var/run/clamav/clamd"],
++#       \&ask_daemon, ["CONTSCAN {}\n", "/var/lib/clamav/clamd.socket"],
+ #       qr/\bOK$/, qr/\bFOUND$/,
+ #       qr/^.*?: (?!Infected Archive)(.*) FOUND$/,
+ #     ],
+diff -Naur amavisd-new-2.6.4/amavisd-nanny amavisd-new-2.6.4.oden/amavisd-nanny
+--- amavisd-new-2.6.4/amavisd-nanny	2009-06-25 19:57:13.000000000 +0200
++++ amavisd-new-2.6.4.oden/amavisd-nanny	2009-06-27 12:48:01.000000000 +0200
+@@ -58,7 +58,7 @@
+ 
+ my($dbfile) = 'nanny.db';
+ my($db_home) =  # DB databases directory
+-  defined $ENV{'AMAVISD_DB_HOME'} ? $ENV{'AMAVISD_DB_HOME'} : '/var/amavis/db';
++  defined $ENV{'AMAVISD_DB_HOME'} ? $ENV{'AMAVISD_DB_HOME'} : '/var/lib/amavis/db';
+ my($wakeuptime) = 2;  # -w, sleep time in seconds, may be fractional
+ my($repeatcount);     # -c, repeat count (when defined)
+ 
+diff -Naur amavisd-new-2.6.4/amavisd-release amavisd-new-2.6.4.oden/amavisd-release
+--- amavisd-new-2.6.4/amavisd-release	2008-08-05 18:49:30.000000000 +0200
++++ amavisd-new-2.6.4.oden/amavisd-release	2009-06-27 12:48:01.000000000 +0200
+@@ -11,7 +11,7 @@
+ # To be placed in amavisd.conf:
+ #   $interface_policy{'SOCK'} = 'AM.PDP';
+ #   $policy_bank{'AM.PDP'} = {protocol=>'AM.PDP'};
+-#   $unix_socketname='/var/amavis/amavisd.sock';
++#   $unix_socketname='/var/lib/amavis/amavisd.sock';
+ #or:
+ #   $interface_policy{'9998'} = 'AM.PDP';
+ #   $policy_bank{'AM.PDP'} = {protocol=>'AM.PDP'};
+@@ -79,7 +79,7 @@
+ 
+   $log_level = 1;
+ # $socketname = '127.0.0.1:9998';
+-  $socketname = '/var/amavis/amavisd.sock';
++  $socketname = '/var/lib/amavis/amavisd.sock';
+ 
+ sub sanitize_str {
+   my($str, $keep_eol) = @_;
+diff -Naur amavisd-new-2.6.4/helper-progs/amavis-milter.c amavisd-new-2.6.4.oden/helper-progs/amavis-milter.c
+--- amavisd-new-2.6.4/helper-progs/amavis-milter.c	2008-06-27 15:31:45.000000000 +0200
++++ amavisd-new-2.6.4.oden/helper-progs/amavis-milter.c	2009-06-27 12:48:01.000000000 +0200
+@@ -61,7 +61,7 @@
+ #define SOCKBUFLEN 8192
+ 
+ #ifndef RUNTIME_DIR
+-# define RUNTIME_DIR "/var/amavis"
++# define RUNTIME_DIR "/var/lib/amavis"
+ #endif
+ 
+ #ifndef AMAVISD_SOCKET
+@@ -923,7 +923,7 @@
+     fprintf(stderr, "Options -g, -x, -D are allowed for compatibility but ignored.\n");
+     fprintf(stderr, "\n");
+     fprintf(stderr, "This helper prgram (milter daemon) is normally started as:\n");
+-    fprintf(stderr, "# su amavis -c '/usr/local/sbin/amavis-milter -p local:/var/amavis/amavis-milter.sock'\n");
++    fprintf(stderr, "# su amavis -c '/usr/sbin/amavis-milter -p local:/var/lib/amavis/amavis-milter.sock'\n");
+ };
+ 
+ int
+diff -Naur amavisd-new-2.6.4/helper-progs/amavis.pl amavisd-new-2.6.4.oden/helper-progs/amavis.pl
+--- amavisd-new-2.6.4/helper-progs/amavis.pl	2004-12-23 02:27:11.000000000 +0100
++++ amavisd-new-2.6.4.oden/helper-progs/amavis.pl	2009-06-27 12:48:01.000000000 +0200
+@@ -7,7 +7,7 @@
+ # Usage:
+ #   amavis.pl sender recip1 recip2 ...  < message.txt
+ # To be placed in amavisd.conf:
+-#   $protocol='AM.PDP';  $unix_socketname='/var/amavis/amavisd.sock';
++#   $protocol='AM.PDP';  $unix_socketname='/var/lib/amavis/amavisd.sock';
+ #
+ #
+ # Author: Mark Martinec <mark.martinec@ijs.si>
+@@ -55,7 +55,7 @@
+ use vars qw($socketname);
+ 
+ # $socketname = '127.0.0.1:9998';
+-  $socketname = '/var/amavis/amavisd.sock';
++  $socketname = '/var/lib/amavis/amavisd.sock';
+ 
+ sub sanitize_str {
+   my($str, $keep_eol) = @_;
+@@ -139,7 +139,7 @@
+   $ctx->add(sprintf("%s %.9f %s", $$, Time::HiRes::time, join(',',@ARGV)));
+   my($id) = substr($ctx->b64digest,0,16);  $id =~ tr{+/}{-.};
+ 
+-  my($tempdir) = "/var/amavis/amavis-milter-$id";
++  my($tempdir) = "/var/lib/amavis/amavis-milter-$id";
+   my($fname) = "$tempdir/email.txt";
+   mkdir($tempdir,0750) or die "Can't create directory $tempdir: $!";
+ 
+diff -Naur amavisd-new-2.6.4/helper-progs/config.h.in amavisd-new-2.6.4.oden/helper-progs/config.h.in
+--- amavisd-new-2.6.4/helper-progs/config.h.in	2006-03-06 01:26:08.000000000 +0100
++++ amavisd-new-2.6.4.oden/helper-progs/config.h.in	2009-06-27 12:48:01.000000000 +0200
+@@ -2,10 +2,10 @@
+ /* config.h.in.  Generated automatically from configure.in by autoheader.  */
+ 
+ /*  Where all temporary files and directories are created */
+-#define RUNTIME_DIR "/var/amavis"
++#define RUNTIME_DIR "/var/lib/amavis"
+ 
+ /*  The full path to the socket used for communication between client and daemon.  */
+-#define AMAVISD_SOCKET "/var/amavis/amavisd.sock"
++#define AMAVISD_SOCKET "/var/lib/amavis/amavisd.sock"
+ 
+ /* Amavis Header Tag  */
+ #define X_HEADER_TAG "X-Virus-Scanned"
+diff -Naur amavisd-new-2.6.4/helper-progs/configure amavisd-new-2.6.4.oden/helper-progs/configure
+--- amavisd-new-2.6.4/helper-progs/configure	2004-04-11 01:51:53.000000000 +0200
++++ amavisd-new-2.6.4.oden/helper-progs/configure	2009-06-27 12:48:01.000000000 +0200
+@@ -803,9 +803,9 @@
+   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+   --with-sendmail=PATH    specify location of Sendmail binary
+-  --with-runtime-dir=DIR        directory for runtime files /var/amavis
++  --with-runtime-dir=DIR        directory for runtime files /var/lib/amavis
+   --with-sockname=PATH          path to socket for daemon/client communication
+-	                                            /var/amavis/amavisd.sock
++	                                            /var/lib/amavis/amavisd.sock
+   --with-user=LOGIN       use LOGIN as the AMAVISD user
+   --with-x-header-tag=X_HEADER_TAG       use X_HEADER_TAG as the AMAVISD header tag
+   --with-x-header-val=X_HEADER_VAL       use X_HEADER_VAL as the AMAVISD header value
+@@ -2376,7 +2376,7 @@
+ fi;
+ 
+ 
+-runtime_dir=/var/amavis
++runtime_dir=/var/lib/amavis
+ echo "$as_me:$LINENO: checking for runtime directory" >&5
+ echo $ECHO_N "checking for runtime directory... $ECHO_C" >&6
+ 
+diff -Naur amavisd-new-2.6.4/helper-progs/configure.in amavisd-new-2.6.4.oden/helper-progs/configure.in
+--- amavisd-new-2.6.4/helper-progs/configure.in	2004-04-11 01:51:52.000000000 +0200
++++ amavisd-new-2.6.4.oden/helper-progs/configure.in	2009-06-27 12:48:01.000000000 +0200
+@@ -29,10 +29,10 @@
+ 
+ 
+ dnl Base directory for runtime files (log file, socket, temp dirs)
+-runtime_dir=/var/amavis
++runtime_dir=/var/lib/amavis
+ AC_MSG_CHECKING([for runtime directory])
+ AC_ARG_WITH(runtime-dir,
+-	      [  --with-runtime-dir=DIR        directory for runtime files [/var/amavis]],
++	      [  --with-runtime-dir=DIR        directory for runtime files [/var/lib/amavis]],
+ 	         runtime_dir=$withval)
+ AC_MSG_RESULT([$runtime_dir])
+ AC_DEFINE_UNQUOTED(RUNTIME_DIR, "$runtime_dir", [ Where all temporary files and directories are created. ])
+@@ -42,7 +42,7 @@
+ AC_MSG_CHECKING([socket name])
+ AC_ARG_WITH(sockname,
+ 	      [  --with-sockname=PATH          path to socket for daemon/client communication
+-	                                            [/var/amavis/amavisd.sock]],
++	                                            [/var/lib/amavis/amavisd.sock]],
+ 						      sockname=$withval, sockname=$runtime_dir/amavisd.sock)
+ 
+ AC_MSG_RESULT([$sockname])
+diff -Naur amavisd-new-2.6.4/README_FILES/amavisd-new-docs.html amavisd-new-2.6.4.oden/README_FILES/amavisd-new-docs.html
+--- amavisd-new-2.6.4/README_FILES/amavisd-new-docs.html	2009-03-10 19:07:24.000000000 +0100
++++ amavisd-new-2.6.4.oden/README_FILES/amavisd-new-docs.html	2009-06-27 12:48:01.000000000 +0200
+@@ -475,7 +475,7 @@
+ a mail from a local quarantine, and send it to MTA through its regular
+ channels ($notify_method), bypassing re-checking.</p>
+ 
+-<p>By default it connects to socket /var/amavis/amavisd.sock, on which
++<p>By default it connects to socket /var/lib/amavis/amavisd.sock, on which
+ amavisd should be listening for AM.PDP protocol, but one can use inet socket
+ instead of a Unix socket if there is a need to run <i>amavisd-release</i>
+ from a remote host.</p>
+@@ -1877,7 +1877,7 @@
+ 
+   dnl Content filter:
+   INPUT_MAIL_FILTER(`amavisd-milter',
+-    `S=unix:/var/amavis/amavisd-milter.sock, F=T, T=S:10m;R:10m;E:10m')
++    `S=unix:/var/lib/amavis/amavisd-milter.sock, F=T, T=S:10m;R:10m;E:10m')
+ 
+   dnl Signers:
+   INPUT_MAIL_FILTER(`dkim-filter-s', `S=inet:4445@127.0.0.1, T=R:2m')
+diff -Naur amavisd-new-2.6.4/README_FILES/README.chroot amavisd-new-2.6.4.oden/README_FILES/README.chroot
+--- amavisd-new-2.6.4/README_FILES/README.chroot	2008-12-06 01:16:26.000000000 +0100
++++ amavisd-new-2.6.4.oden/README_FILES/README.chroot	2009-06-27 12:48:01.000000000 +0200
+@@ -32,11 +32,11 @@
+ # before running commands below, as most of them use relative paths!
+ #
+ umask 0022
+-mkdir /var/amavis
+-cd /var/amavis
++mkdir /var/lib/amavis
++cd /var/lib/amavis
+ 
+ 
+-# make directory structure within the current directory (/var/amavis)
++# make directory structure within the current directory (/var/lib/amavis)
+ mkdir -p etc dev var/run var/virusmails
+ mkdir -p usr/bin usr/lib usr/libexec usr/share usr/share/zoneinfo
+ mkdir -p usr/share/misc usr/share/spamassassin etc/mail/spamassassin
+@@ -68,13 +68,13 @@
+ 
+ 
+ # make a symbolic link so that chrooted processes can refer to the
+-# home directory as /var/amavis (same as not-chrooted), and do not have
++# home directory as /var/lib/amavis (same as not-chrooted), and do not have
+ # to handle it differently (i.e. referring to it as  / )
+ ln -s / var/amavis
+ # actually, the following is more general:  d=`pwd`; ln -s / $d$d
+ 
+ 
+-# copy required binaries to /var/amavis/usr/bin
++# copy required binaries to /var/lib/amavis/usr/bin
+ for j in \
+   /usr/bin/file /usr/bin/ar /bin/pax /usr/bin/gzip /usr/bin/bzip2 \
+   /usr/local/bin/nomarch /usr/local/bin/arc \
+@@ -87,7 +87,7 @@
+   /usr/local/bin/dccproc /usr/local/bin/pyzor
+ do cp -p $j usr/bin/; done
+ 
+-# copy needed /etc files to /var/amavis/etc
++# copy needed /etc files to /var/lib/amavis/etc
+ for j in \
+   /etc/protocols /etc/services /etc/netconfig /etc/hosts \
+   /etc/group /etc/passwd /etc/resolv.conf /etc/localtime \
+@@ -107,8 +107,8 @@
+ # copy time zones data /usr/share/zoneinfo (or perhaps /usr/lib/zoneinfo)
+ cp -pR /usr/share/zoneinfo usr/share/  # FreeBSD
+ 
+-# copy shared libraries to /var/amavis/lib
+-#   (check:  ldd /var/amavis/usr/bin/*  to see which ones are needed)
++# copy shared libraries to /var/lib/amavis/lib
++#   (check:  ldd /var/lib/amavis/usr/bin/*  to see which ones are needed)
+ 
+ ln -s usr/lib .
+ ln -s usr/libexec .
+@@ -163,8 +163,8 @@
+ cp /usr/local/bin/freshclam /usr/local/sbin/clamd usr/bin/
+ cp /usr/local/etc/clamd.conf etc/
+ # Start clamd and freshclam:
+-#   chroot -u vscan /var/amavis /usr/sbin/clamd
+-#   chroot -u vscan /var/amavis /usr/bin/freshclam -d \
++#   chroot -u vscan /var/lib/amavis /usr/sbin/clamd
++#   chroot -u vscan /var/lib/amavis /usr/bin/freshclam -d \
+ #     -c 4 --log-verbose --datadir=/usr/local/share/clam \
+ #     -l /var/log/clam-update.log
+ 
+@@ -189,26 +189,26 @@
+ chmod 666 dev/null
+ chmod 644 dev/*random
+ 
+-# /etc/passwd: set home directory of user vscan to /var/amavis/home !!!
++# /etc/passwd: set home directory of user vscan to /var/lib/amavis/home !!!
+ 
+ 
+ # Daemonized virus scanners (e.g. Sophie, ClamD) may be
+ # started in the same chroot jail, or not.  E.g.
+-#   chroot /var/amavis /usr/bin/sophie -D
++#   chroot /var/lib/amavis /usr/bin/sophie -D
+ #
+ # If you want, you may now remove /usr/local/sav and make a link instead,
+ # to avoid having two copies of Sophos database:
+-#   ln -s /var/amavis/usr/local/sav /usr/local/sav
++#   ln -s /var/lib/amavis/usr/local/sav /usr/local/sav
+ # consider:
+-#   ln -s /var/amavis/var/run/sophie      /var/run/     # Sophie socket
+-#   ln -s /var/amavis/var/run/sophie.pid  /var/run/
++#   ln -s /var/lib/amavis/var/run/sophie      /var/run/     # Sophie socket
++#   ln -s /var/lib/amavis/var/run/sophie.pid  /var/run/
+ 
+ # Programs may be tested individually to see if they are happy
+ # in the chroot jail:
+ #
+ perl -Te 'use POSIX; $ENV{PATH}="/usr/bin";
+          $uid=getpwnam("vscan")   or die "E1:$!";
+-         chroot "/var/amavis"     or die "E2:$!"; chdir "/";
++         chroot "/var/lib/amavis"     or die "E2:$!"; chdir "/";
+          POSIX::setuid($uid)      or die "E3:$!";
+          open(STDIN,"</dev/null") or die "E4:$!";
+          exec qw(file /etc/amavisd.conf) or die "E5:$!"'; echo $?
+@@ -220,8 +220,8 @@
+ #          exec qw(gzip -c 0.lis) or die "E6:$!"'; echo $
+ #    ... exec qw(clamscan /etc/resolv.conf) or die "E5:$!"'; echo $?
+ 
+-Edit /var/amavis/etc/amavisd.conf, setting:
+-  $MYHOME = '/var/amavis';
++Edit /var/lib/amavis/etc/amavisd.conf, setting:
++  $MYHOME = '/var/lib/amavis';
+   $ENV{TMPDIR} = $TEMPBASE = "$MYHOME/tmp-am";
+   $daemon_chroot_dir = $MYHOME;
+   $helpers_home = "$MYHOME/home";  # prefer $MYHOME clean and owned by root?
+@@ -233,7 +233,7 @@
+ Logging should preferably be directed to syslog. Configure syslogd to
+ provide a socket in the amavis jail (option -l on FreeBSD, option -a
+ on OpenBSD and Linux). Under FreeBSD place something like:
+-  syslogd_flags="-l /var/amavis/var/run/log -ss"
++  syslogd_flags="-l /var/lib/amavis/var/run/log -ss"
+ into /etc/rc.conf .
+ 
+ Because the program starts outside the chroot jail and brings-in all Perl
+diff -Naur amavisd-new-2.6.4/README_FILES/README.milter amavisd-new-2.6.4.oden/README_FILES/README.milter
+--- amavisd-new-2.6.4/README_FILES/README.milter	2006-12-04 14:58:33.000000000 +0100
++++ amavisd-new-2.6.4.oden/README_FILES/README.milter	2009-06-27 12:48:01.000000000 +0200
+@@ -41,7 +41,7 @@
+    account, just to reduce the chance that the scanner modifies the
+    message.  If you don't do this then you'll run into permission
+    problems.  The account that you run amavis as *MUST* own the
+-   /var/amavis directory and the quarantine directory (usually
++   /var/lib/amavis directory and the quarantine directory (usually
+    /var/virusmails).
+ 
+    Now, create the following account for amavisd and amavis milter:
+@@ -94,7 +94,7 @@
+     pick a free port number above 1024, and change:
+ 
+     - in file sendmail.mc in the call to the macro INPUT_MAIL_FILTER
+-        replace:  S=local:/var/amavis/amavis-milter.sock
++        replace:  S=local:/var/lib/amavis/amavis-milter.sock
+         with:     S=inet:port@hostname
+ 
+       (substituting 'port' with your chosen port number,
+@@ -103,7 +103,7 @@
+ 
+     - when starting milter-amavis process, change the value of
+       it's option -p:
+-        replace   -p local:/var/amavis/amavis-milter.sock
++        replace   -p local:/var/lib/amavis/amavis-milter.sock
+         with:     -p inet:port@0.0.0.0
+ 
+       (substituting 'port' with your chosen port number,
+@@ -184,7 +184,7 @@
+ is mandatory):
+ 
+ 	INPUT_MAIL_FILTER(`milter-amavis',
+-	    `S=local:/var/amavis/amavis-milter.sock, F=T, T=S:10m;R:10m;E:10m')
++	    `S=local:/var/lib/amavis/amavis-milter.sock, F=T, T=S:10m;R:10m;E:10m')
+         define(`confMILTER_MACROS_ENVFROM',
+             confMILTER_MACROS_ENVFROM`, r, b') # supply macros b,r to helper
+ 
+@@ -226,7 +226,7 @@
+      have to be launched for every message.  Examples include Sophos+Sophie,
+      Trend+Trophie and ClamAV.
+ 
+-   * Use separate disks/controllers for the amavis spool (/var/amavis) and
++   * Use separate disks/controllers for the amavis spool (/var/lib/amavis) and
+      the sendmail spool (/var/spool/...).
+ 
+    * Put amavis on another system (assuming you've got a fast network).  This
+@@ -234,7 +234,7 @@
+      bound.
+ 
+    * Use memory based file systems (TMPFS in Linux and Solaris, MFS in
+-     (Free)BSD) for the amavis spool (/var/amavis).  Don't do this for the
++     (Free)BSD) for the amavis spool (/var/lib/amavis).  Don't do this for the
+      quarantine directory and don't do it for the sendmail spool without
+      reading the tuning section in the Sendmail (Bat) book (3rd edition)
+      by O'Reilly.
+@@ -256,7 +256,7 @@
+         . /etc/sysconfig/amavis
+     else
+         AMAVIS_ACCOUNT=amavis
+-        MILTER_SOCKET=/var/amavis/amavis-milter.sock
++        MILTER_SOCKET=/var/lib/amavis/amavis-milter.sock
+         MILTER_FLAGS=""		# Set the options you want passed to amavis-milter
+ fi
+ 
+@@ -265,7 +265,7 @@
+   start)
+         # Start daemons.
+         echo -n "Starting amavis-milter: "
+-        rm -fr /var/amavis/amavis*.sock
++        rm -fr /var/lib/amavis/amavis*.sock
+         su - ${AMAVIS_ACCOUNT} -c /usr/sbin/amavisd
+         sleep 5
+         su - ${AMAVIS_ACCOUNT} -c "/usr/sbin/amavis-milter ${MILTER_FLAGS} -p local:${MILTER_SOCKET}"
+@@ -280,7 +280,7 @@
+   stop)
+         # Stop daemons.
+         echo -n "Shutting down amavis-milter: "
+-        if [ -f /var/amavis/amavisd.pid ]; then
++        if [ -f /var/lib/amavis/amavisd.pid ]; then
+                 # *** PAY ATTENTION ***
+                 # pkill only seems to exist in LINUX, whereas the -m option to killall only exists in BSD.
+                 # You may have to modify the following commands depending on your system.

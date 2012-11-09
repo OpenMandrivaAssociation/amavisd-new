@@ -1,0 +1,57 @@
+--- amavisd-new-2.7.0.dlucio/amavisd-snmp-subagent	2011-01-25 20:17:02.000000000 +0100
++++ amavisd-new-2.7.0.dlucio/amavisd-snmp-subagent.snmp	2011-07-14 20:44:26.000000000 +0200
+@@ -98,6 +98,8 @@
+ my($pid_file_created) = 0;
+ my($syslog_open) = 0;
+ my($num_proc_gone) = 0;
++my($agentx_socket); # e.g. "localhost:705";
++
+ 
+ # geometic progression, rounded,
+ #   common ratio = exp((ln(60)-ln(1))/6) = 1.97860
+@@ -125,6 +127,7 @@
+ use NetSNMP::OID;
+ use NetSNMP::ASN qw(:all);
+ use NetSNMP::agent qw(:all);
++use NetSNMP::agent::default_store qw(:all);
+ use NetSNMP::default_store qw(:all);
+ 
+ my(%oidstr_to_obj);
+@@ -734,6 +737,8 @@
+    -f              stay in foreground
+    -d log_level    debugging level, 0..5, default 0
+    -P pid_file     a file name to receive a PID of a damonized process
++   -S socket       agentx socket/port
++                     default localhost:705
+    -D db_home_dir  amavis database directory ($db_home),
+                      default AMAVISD_DB_HOME or /var/amavis/db
+ EOD
+@@ -747,7 +752,7 @@
+   $SIG{TERM} = sub { die "terminated\n" };   # do the END code block
+   $SIG{PIPE} = 'IGNORE';  # don't signal on a write to a widowed pipe
+ 
+-  while (@ARGV >= 2 && $ARGV[0] =~ /^-[dDP]\z/ ||
++  while (@ARGV >= 2 && $ARGV[0] =~ /^-[dDPS]\z/ ||
+          @ARGV >= 1 && $ARGV[0] =~ /^-[hVf-]\z/) {
+     my($opt,$val);
+     $opt = shift @ARGV;
+@@ -766,6 +771,8 @@
+       $db_home = untaint($val)  if $val ne '';
+     } elsif ($opt eq '-P') {  # -P pid_file
+       $pid_filename = untaint($val)  if $val ne '';
++    } elsif ($opt eq '-S') {  # -S agentx_socket
++      $agentx_socket = untaint($val)  if $val ne '';
+     } else {
+       die "Error in parsing command line options: $opt\n\n" . usage();
+     }
+@@ -1191,6 +1198,10 @@
+ 
+   #netsnmp_ds_set_boolean(NETSNMP_DS_APPLICATION_ID,
+   #                       NETSNMP_DS_LIB_DONT_READ_CONFIGS, 1);
++  if (defined($agentx_socket)) {
++    netsnmp_ds_set_string(NETSNMP_DS_APPLICATION_ID,
++                          NETSNMP_DS_AGENT_X_SOCKET, $agentx_socket);
++  }
+ 
+   my($agent) = NetSNMP::agent->new('Name' => $agent_name, 'AgentX' => 1)
+     or die "Can't create a SNMP agent $agent_name";

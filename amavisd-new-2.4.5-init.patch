@@ -1,0 +1,74 @@
+--- amavisd-new-2.4.5/amavisd_init.sh.orig	2007-05-17 09:54:20.000000000 -0300
++++ amavisd-new-2.4.5/amavisd_init.sh	2007-05-17 09:58:59.000000000 -0300
+@@ -3,11 +3,20 @@
+ # amavisd	This script controls the amavisd-new daemon.
+ #		(to be used with version amavisd-new-20020630 or later)
+ #
+-
+ # chkconfig: 2345 79 31
+ # description: amavisd is an interface between MTA and content checkers
+ # processname: amavisd
+-# pidfile: /var/amavis/amavisd.pid
++# pidfile: /var/lib/amavis/amavisd.pid
++### BEGIN INIT INFO
++# Provides: amavisd
++# Default-Start: 2 3 4 5
++# Default-Stop: 0 1 6
++# Required-Start: $network $syslog
++# Required-Stop: $network $syslog
++# Should-Start: $named clamd
++# Short-Description: A Mail Virus Scanner
++# Description: amavisd is an interface between MTA and content checkers.
++### END INIT INFO
+ 
+ # Source function library.
+ . /etc/rc.d/init.d/functions
+@@ -15,11 +24,10 @@
+ # Source networking configuration.
+ . /etc/sysconfig/network
+ 
+-#prog="/opt/amavisd-new/sbin/amavisd"
+ prog="/usr/sbin/amavisd"
+ prog_base="$(basename ${prog})"
+ 
+-prog_config_file="/etc/amavisd.conf"
++prog_config_file="/etc/amavisd/amavisd.conf"
+ 
+ # Source configuration.
+ [ -e /etc/sysconfig/${prog_base} ] && . /etc/sysconfig/${prog_base}
+@@ -32,19 +40,15 @@
+ # See how we were called.
+ case "$1" in
+   start)
+-	action $"Starting ${prog_base}:" ${prog} -c ${prog_config_file}
++	action $"Starting %s:" "${prog_base}" ${prog} -c ${prog_config_file}
+ 	RETVAL=$?
+ 	[ $RETVAL -eq 0 ] && touch /var/lock/subsys/${prog_base}
+-	echo
+ 	;;
+   stop)
+-	action $"Shutting down ${prog_base}:" ${prog} -c ${prog_config_file} stop
++	action $"Shutting down %s:" "${prog_base}" ${prog} -c ${prog_config_file} stop 2>/dev/null
+ 	RETVAL=$?
+ 	if [ $RETVAL -eq 0 ] ; then
+-	        echo "${prog_base} stopped"
+         	rm -f /var/lock/subsys/${prog_base}
+-	else
+-		echo
+ 	fi
+ 	;;
+   status)
+@@ -57,11 +61,11 @@
+ 	RETVAL=$?
+ 	;;
+   reload)
+-	action $"Reloading ${prog_base}:" ${prog} -c ${prog_config_file} reload
++	action $"Reloading %s:" "${prog_base}" ${prog} -c ${prog_config_file} reload 2>/dev/null
+ 	RETVAL=$?
+ 	;;
+   *)
+-	echo "Usage: $0 {start|stop|status|restart|reload}"
++	gprintf "Usage: %s {start|stop|status|restart|reload}\n" "$0"
+ 	exit 1
+ esac
+ 

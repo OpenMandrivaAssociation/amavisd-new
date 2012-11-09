@@ -1,0 +1,51 @@
+--- amavisd-new-2.7.1/amavisd.SA	2012-05-11 02:09:31.401739392 +0200
++++ amavisd-new-2.7.1/amavisd	2012-05-11 02:10:38.805737383 +0200
+@@ -395,6 +395,8 @@ BEGIN {
+       %dkim_signing_keys_by_domain
+       @dkim_signing_keys_list @dkim_signing_keys_storage
+       $file $altermime $enable_anomy_sanitizer
++      $sa_local_rules_dir $sa_def_rules_dir 
++      $sa_local_state_dir $sa_prefix_dir
+     )],
+     'sa' =>  # global SpamAssassin settings
+     [qw(
+@@ -16138,14 +16140,14 @@ eval {
+     my($msg) = !defined($killed_amavisd_pid) ? undef :
+                "Daemon [$killed_amavisd_pid] terminated by SIG$kill_sig_used";
+     if ($cmd eq 'stop') {
+-      if (defined $msg) { do_log(2,"%s",$msg); print STDOUT "$msg\n" }
++      if (defined $msg) { do_log(2,"%s",$msg); }
+       exit(0);
+     }
+     if (defined $killed_amavisd_pid) {
+-      print STDOUT "$msg, waiting for dust to settle...\n";
++      do_log (2, "$msg, waiting for dust to settle...\n");
+       sleep 5;  # wait for the TCP socket to be released
+     }
+-    print STDOUT "becoming a new daemon...\n";
++    do_log (2, "becoming a new daemon...\n");
+   } else {
+     die "$myversion: Unknown command line parameter: $cmd\n\n" . usage();
+   }
+@@ -24753,12 +24755,16 @@ sub new_SpamAssassin_instance {
+     home_dir_for_helpers => $helpers_home,
+     rules_filename       => $sa_configpath,
+     site_rules_filename  => $sa_siteconfigpath,
+-#   LOCAL_STATE_DIR   => '/var/lib',
+-#   PREFIX            => '/usr/',
+-#   DEF_RULES_DIR     => '/usr/share/spamassassin',
+-#   LOCAL_RULES_DIR   => '/etc/mail/spamassassin',
+-#see man Mail::SpamAssassin for other options
++#   see man Mail::SpamAssassin for other options
+   };
++  if (defined $sa_local_state_dir && !defined $sa_args->{LOCAL_STATE_DIR})
++    { $sa_args->{LOCAL_STATE_DIR} = $sa_local_state_dir }
++  if (defined $sa_prefix_dir && !defined $sa_args->{PREFIX})
++    { $sa_args->{PREFIX} = $sa_prefix_dir };
++  if (defined $sa_def_rules_dir && !defined $sa_args->{DEF_RULES_DIR})
++    { $sa_args->{DEF_RULES_DIR} = $sa_def_rules_dir };
++  if (defined $sa_local_rules_dir && !defined $sa_args->{LOCAL_RULES_DIR})
++    { $sa_args->{LOCAL_RULES_DIR} = $sa_local_rules_dir };
+   if ($sa_version_num < 3.001005 && !defined $sa_args->{LOCAL_STATE_DIR})
+     { $sa_args->{LOCAL_STATE_DIR} = '/var/lib' } # don't ignore sa-update rules
+   local($1,$2,$3,$4,$5,$6);  # avoid Perl bug, $1 gets tainted in compile_now
