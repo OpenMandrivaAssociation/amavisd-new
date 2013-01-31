@@ -1,6 +1,6 @@
---- amavisd-new-2.7.0.dlucio/amavisd	2011-07-14 20:07:58.000000000 +0200
-+++ amavisd-new-2.7.0.dlucio/amavisd.sa	2011-07-14 20:39:01.000000000 +0200
-@@ -395,6 +395,8 @@
+--- amavisd-new-2.8.0/amavisd.SA	2013-01-31 21:58:39.233055407 +0100
++++ amavisd-new-2.8.0/amavisd	2013-01-31 22:02:14.467461169 +0100
+@@ -400,6 +400,8 @@ BEGIN {
        %dkim_signing_keys_by_domain
        @dkim_signing_keys_list @dkim_signing_keys_storage
        $file $altermime $enable_anomy_sanitizer
@@ -9,43 +9,27 @@
      )],
      'sa' =>  # global SpamAssassin settings
      [qw(
-@@ -2111,7 +2113,7 @@
- # turn debug logging to STDERR on or off
- #
- sub log_to_stderr(;$) {
--  $log_to_stderr = shift  if @_ > 0;
-+  $log_to_	stderr = shift  if @_ > 0;
-   $log_to_stderr;
- }
- 
-@@ -16094,14 +16096,14 @@
-     my($msg) = !defined($killed_amavisd_pid) ? undef :
-                "Daemon [$killed_amavisd_pid] terminated by SIG$kill_sig_used";
+@@ -17216,14 +17218,14 @@ eval {
+     my $msg = !defined($killed_amavisd_pid) ? undef :
+               "Daemon [$killed_amavisd_pid] terminated by SIG$kill_sig_used";
      if ($cmd eq 'stop') {
--      if (defined $msg) { do_log(2,"%s",$msg); print STDERR "$msg\n" }
+-      if (defined $msg) { do_log(2,"%s",$msg); print STDOUT "$msg\n" }
 +      if (defined $msg) { do_log(2,"%s",$msg); }
        exit(0);
      }
      if (defined $killed_amavisd_pid) {
--      print STDERR "$msg, waiting for dust to settle...\n";
+-      print STDOUT "$msg, waiting for dust to settle...\n";
 +      do_log (2, "$msg, waiting for dust to settle...\n");
        sleep 5;  # wait for the TCP socket to be released
      }
--    print STDERR "becoming a new daemon...\n";
-+    do_log(2, "becoming a new daemon...\n");
+-    print STDOUT "becoming a new daemon...\n";
++    do_log (2, "becoming a new daemon...\n")
    } else {
      die "$myversion: Unknown command line parameter: $cmd\n\n" . usage();
    }
-@@ -24678,12 +24680,16 @@
-     home_dir_for_helpers => $helpers_home,
-     rules_filename       => $sa_configpath,
-     site_rules_filename  => $sa_siteconfigpath,
--#   LOCAL_STATE_DIR   => '/var/lib',
--#   PREFIX            => '/usr/',
--#   DEF_RULES_DIR     => '/usr/share/spamassassin',
--#   LOCAL_RULES_DIR   => '/etc/mail/spamassassin',
--#see man Mail::SpamAssassin for other options
-+#   see man Mail::SpamAssassin for other options
+@@ -26612,6 +26614,14 @@ sub new_SpamAssassin_instance {
+ #   LOCAL_STATE_DIR   => '/var/lib/spamassassin',
+ #see Mail::SpamAssassin man page for other options
    };
 +  if (defined $sa_local_state_dir && !defined $sa_args->{LOCAL_STATE_DIR})
 +    { $sa_args->{LOCAL_STATE_DIR} = $sa_local_state_dir }
