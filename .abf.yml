@@ -1,4 +1,2 @@
 removed_sources:
-  amavisd-new-2.7.0.tar.gz: b4ba0a4e9d3fbbfc6a790e81837a8b7eb9480f47
-sources:
-  amavisd-new-2.8.0.tar.gz: ccc11b68baaad99a497d4c3bbc38407fb68f11fc
+  amavisd-new-2.8.1.tar.gz: de0928a4b9ab3d2d3b3a633a438f1a8b09ec86d5

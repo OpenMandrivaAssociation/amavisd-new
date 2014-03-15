@@ -1,7 +1,7 @@
 Summary:	A Mail Virus Scanner
 Name:		amavisd-new
-Version:	2.8.0
-Release:	5
+Version:	2.8.1
+Release:	1
 License:	GPLv2
 Group:		Networking/Mail
 Url:		http://www.ijs.si/software/amavisd/
