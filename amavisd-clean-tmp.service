@@ -1,0 +1,14 @@
+[Unit]
+Description=Clean amavisd tmp folder
+
+[Service]
+Type=oneshot
+User=amavis
+Group=amavis
+PrivateTmp=true
+PrivateDevices=true
+PrivateNetwork=true
+CapabilityBoundingSet=
+ProtectSystem=full
+ProtectHome=true
+ExecStart=/usr/sbin/tmpwatch 24 /var/spool/amavisd/tmp

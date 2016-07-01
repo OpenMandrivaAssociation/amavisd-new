@@ -1,0 +1,19 @@
+[Unit]
+Description=Exports amavisd SNMP data
+After=network.target amavisd.service
+
+[Service]
+Type=forking
+User=amavis
+Group=amavis
+PIDFile=/var/run/amavisd/amavisd-snmp-subagent.pid
+ExecStart=/usr/sbin/amavisd-snmp-subagent -D /var/spool/amavisd/db -P /var/run/amavisd/amavisd-snmp-subagent.pid
+Restart=on-failure
+PrivateTmp=true
+PrivateDevices=true
+CapabilityBoundingSet=
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

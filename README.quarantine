@@ -1,0 +1,24 @@
+To enable quarantine support simply change the following line in
+/etc/amavisd/amavisd.conf:
+
+  $QUARANTINEDIR = undef;      # -Q
+
+to
+
+  $QUARANTINEDIR = "$MYHOME/quarantine";      # -Q
+
+then restart amavisd.
+
+The following will make the change for you:
+
+  sed -i.orig -e '/\$QUARANTINEDIR =/s,undef,"$MYHOME/quarantine",' \
+      /etc/amavisd/amavisd.conf
+
+PLEASE NOTE:  This is intentionally a manual step.  Before turning on
+the quarantine feature of amavisd-new, be sure that there is a
+sufficient amount of free space on /var/spool/amavisd/quarantine.
+"Sufficient" depends entirely on your environment.
+
+In the default configuration, files in the quarantine directory will
+be automatically deleted by tmpwatch after 30 days.  See
+/etc/cron.daily/amavisd to adjust this behavior for your environment.

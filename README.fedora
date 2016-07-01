@@ -1,0 +1,65 @@
+INSTALLATION
+------------
+Installing amavisd-new from Fedora is simple.  First, install the
+amavisd-new package:
+
+  yum -y install amavisd-new
+
+Don't be alarmed at the number of dependencies this installs.  This
+package tries to be as full-featured as possible, including many
+optional components for amavisd-new.
+
+Next, configure amavisd-new to start on boot:
+
+  systemctl enable amavisd.service
+
+When you are ready, start the amavisd service, it will also start
+a clamd instance if available.
+
+  systemctl start amavisd.service
+
+Check /var/log/maillog for startup messages of amavisd and clamd.
+You can also check the journal.
+
+  journalctl -a -u amavisd -u clamd@amavisd
+
+The next step is to integrate amavisd with your MTA.
+
+POSTFIX
+-------
+The simplest method for enabling amavisd-new support in postfix is to
+use the content_filter configuration option to tell postfix to relay
+mail through amavisd-new using SMTP.  In this configuration, incoming
+mail passes from postfix to amavisd and back to postfix.  (Mail never
+actually leaves the control of postfix however, since amavisd does not
+answer OK until it scans the message and transfers it back to postfix.
+The worst that can happen is a failure at just the right time could
+allow a message to be queued twice.)
+
+Add the following to /etc/postfix/main.cf:
+
+  content_filter = smtp:[127.0.0.1]:10024
+
+You will probably also want to limit the number of postfix processes
+to keep mail from coming in faster than it can be processed by adding
+the following to /etc/postfix/main.cf:
+
+  default_process_limit = 20
+
+Add the following to /etc/postfix/master.cf:
+
+  127.0.0.1:10025 inet n - - - 0 smtpd -o content_filter=
+
+Be sure to read the TUNING section in README.postfix for information
+on process limits.
+
+SENDMAIL
+--------
+See README.sendmail* in this directory.
+
+Please note that amavisd-new's milter functionality is not enabled in
+this package.
+
+EXIM
+----
+See README.exim* in this directory.

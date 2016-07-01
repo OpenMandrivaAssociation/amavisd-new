@@ -1,0 +1,23 @@
+[Unit]
+Description=Amavisd-new is an interface between MTA and content checkers.
+Documentation=http://www.ijs.si/software/amavisd/#doc
+After=network.target
+Wants=clamd@amavisd.service
+Wants=postfix.service
+
+[Service]
+Type=forking
+User=amavis
+Group=amavis
+PIDFile=/var/run/amavisd/amavisd.pid
+ExecStart=/usr/sbin/amavisd -c /etc/amavisd/amavisd.conf
+ExecReload=/usr/sbin/amavisd -c /etc/amavisd/amavisd.conf reload
+Restart=on-failure
+PrivateTmp=true
+PrivateDevices=true
+CapabilityBoundingSet=
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

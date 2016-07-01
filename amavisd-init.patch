@@ -1,0 +1,24 @@
+--- amavisd-new-2.3.2.orig/amavisd_init.sh	2002-11-15 22:22:47.000000000 -0600
++++ amavisd-new-2.3.2/amavisd_init.sh	2005-07-06 16:11:23.000000000 -0500
+@@ -4,10 +4,10 @@
+ #		(to be used with version amavisd-new-20020630 or later)
+ #
+ 
+-# chkconfig: 2345 79 31
++# chkconfig: - 79 31
+ # description: amavisd is an interface between MTA and content checkers
+ # processname: amavisd
+-# pidfile: /var/amavis/amavisd.pid
++# pidfile: /var/run/amavisd/amavisd.pid
+ 
+ # Source function library.
+ . /etc/rc.d/init.d/functions
+@@ -19,7 +19,7 @@
+ prog="/usr/sbin/amavisd"
+ prog_base="$(basename ${prog})"
+ 
+-prog_config_file="/etc/amavisd.conf"
++prog_config_file="/etc/amavisd/amavisd.conf"
+ 
+ # Source configuration.
+ [ -e /etc/sysconfig/${prog_base} ] && . /etc/sysconfig/${prog_base}

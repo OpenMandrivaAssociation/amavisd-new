@@ -1,0 +1,16 @@
+--- amavisd/amavisd_init.sh.orig	2004-02-23 16:09:02.000000000 -0600
++++ amavisd/amavisd_init.sh	2004-02-23 16:13:52.000000000 -0600
+@@ -60,8 +60,12 @@
+ 	action $"Reloading ${prog_base}:" ${prog} -c ${prog_config_file} reload
+ 	RETVAL=$?
+ 	;;
++  condrestart)
++	[ -f /var/lock/subsys/${prog_base} ] && $0 restart || :
++	RETVAL=$?
++	;;
+   *)
+-	echo "Usage: $0 {start|stop|status|restart|reload}"
++	echo "Usage: $0 {start|stop|status|restart|reload|condrestart}"
+ 	exit 1
+ esac
+ 

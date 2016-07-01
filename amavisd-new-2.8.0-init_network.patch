@@ -1,0 +1,13 @@
+--- amavisd-new-2.8.0/amavisd_init.sh	2002-11-15 20:22:47.000000000 -0800
++++ amavisd-new-2.8.0/amavisd_init.sh.new	2013-05-10 09:54:58.849116467 -0700
+@@ -12,8 +12,8 @@
+ # Source function library.
+ . /etc/rc.d/init.d/functions
+ 
+-# Source networking configuration.
+-. /etc/sysconfig/network
++## Source networking configuration.
++#. /etc/sysconfig/network
+ 
+ #prog="/opt/amavisd-new/sbin/amavisd"
+ prog="/usr/sbin/amavisd"

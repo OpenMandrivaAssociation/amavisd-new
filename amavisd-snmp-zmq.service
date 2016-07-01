@@ -1,0 +1,21 @@
+[Unit]
+Description=Exports amavisd SNMP data and communicates through 0MQ sockets
+After=network.target
+After=amavis-mc.service
+After=amavisd.service
+
+[Service]
+Type=forking
+User=amavis
+Group=amavis
+PIDFile=/var/run/amavisd/amavisd-snmp-subagent-zmq.pid
+ExecStart=/usr/sbin/amavisd-snmp-subagent-zmq -P /var/run/amavisd/amavisd-snmp-subagent-zmq.pid
+Restart=on-failure
+PrivateTmp=true
+PrivateDevices=true
+CapabilityBoundingSet=
+ProtectSystem=full
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target

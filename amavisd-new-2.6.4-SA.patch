@@ -1,6 +1,6 @@
---- amavisd-new-2.8.0/amavisd.SA	2013-01-31 21:58:39.233055407 +0100
-+++ amavisd-new-2.8.0/amavisd	2013-01-31 22:02:14.467461169 +0100
-@@ -400,6 +400,8 @@ BEGIN {
+--- amavisd-new-2.11.0/amavisd.0003~	2016-04-26 21:24:33.000000000 +0200
++++ amavisd-new-2.11.0/amavisd	2016-07-01 23:25:55.342446018 +0200
+@@ -407,6 +407,8 @@ BEGIN {
        %dkim_signing_keys_by_domain
        @dkim_signing_keys_list @dkim_signing_keys_storage
        $file $altermime $enable_anomy_sanitizer
@@ -9,25 +9,25 @@
      )],
      'sa' =>  # global SpamAssassin settings
      [qw(
-@@ -17216,14 +17218,14 @@ eval {
-     my $msg = !defined($killed_amavisd_pid) ? undef :
-               "Daemon [$killed_amavisd_pid] terminated by SIG$kill_sig_used";
-     if ($cmd eq 'stop') {
--      if (defined $msg) { do_log(2,"%s",$msg); print STDOUT "$msg\n" }
-+      if (defined $msg) { do_log(2,"%s",$msg); }
-       exit(0);
+@@ -19642,14 +19644,14 @@ eval {  # is amavisd daemon already runn
+       my $msg = !defined($killed_amavisd_pid) ? undef :
+                 "Daemon [$killed_amavisd_pid] terminated by SIG$kill_sig_used";
+       if ($cmd eq 'stop') {
+-        if (defined $msg) { do_log(2,"%s",$msg); print STDOUT "$msg\n" }
++        if (defined $msg) { do_log(2,"%s",$msg); }
+         exit(0);
+       }
+       if (defined $killed_amavisd_pid) {
+-        print STDOUT "$msg, waiting for dust to settle...\n";
++        do_log (2, "$msg, waiting for dust to settle...\n");
+         sleep 5;  # wait for TCP sockets to be released
+       }
+-      print STDOUT "becoming a new daemon...\n";
++      do_log (2, "becoming a new daemon...\n");
      }
-     if (defined $killed_amavisd_pid) {
--      print STDOUT "$msg, waiting for dust to settle...\n";
-+      do_log (2, "$msg, waiting for dust to settle...\n");
-       sleep 5;  # wait for the TCP socket to be released
-     }
--    print STDOUT "becoming a new daemon...\n";
-+    do_log (2, "becoming a new daemon...\n")
    } else {
      die "$myversion: Unknown command line parameter: $cmd\n\n" . usage();
-   }
-@@ -26612,6 +26614,14 @@ sub new_SpamAssassin_instance {
+@@ -30587,6 +30589,14 @@ sub new_SpamAssassin_instance {
  #   LOCAL_STATE_DIR   => '/var/lib/spamassassin',
  #see Mail::SpamAssassin man page for other options
    };

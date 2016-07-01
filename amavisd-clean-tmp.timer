@@ -1,0 +1,9 @@
+[Unit]
+Description=Amavisd clean tmp timer
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=24h
+
+[Install]
+WantedBy=timers.target
