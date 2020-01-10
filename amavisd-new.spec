@@ -168,7 +168,7 @@ It supports communicating through 0MQ sockets.
 
 %prep
 %setup -q -n %{name}-%{version}%{?prerelease:-%{prerelease}}
-%apply_patches
+%autopatch -p1
 
 install -p -m 644 %{SOURCE4} %{SOURCE5} README_FILES/
 sed -e 's,/var/amavis/amavisd.sock\>,%{_localstatedir}/spool/amavisd/amavisd.sock,' -i amavisd-release
