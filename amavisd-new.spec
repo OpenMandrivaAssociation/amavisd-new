@@ -7,7 +7,7 @@ Release:        4
 # LDAP schema is GFDL, some helpers are BSD, core is GPLv2+
 License:        GPLv2+ and BSD and GFDL
 Group:          Networking/Mail
-URL:            http://www.ijs.si/software/amavisd/
+URL:            https://www.ijs.si/software/amavisd/
 Source0:        http://www.ijs.si/software/amavisd/amavisd-new-%{version}%{?prerelease:-%{prerelease}}.tar.bz2
 Source2:        amavis-clamd.conf
 Source4:        README.fedora
